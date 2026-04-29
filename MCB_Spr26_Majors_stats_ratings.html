@@ -87,7 +87,7 @@ tr.as-red-row td{background:rgba(204,34,34,0.09)!important}
 <div class="hdr">
   <div class="hdr-top">
     <div class="title">MCB Majors League</div>
-    <div class="subtitle">Season Stats - 2026 - Updated Apr 29 2026 14:26</div>
+    <div class="subtitle">Season Stats - 2026 - Updated Apr 29 2026 15:07</div>
   </div>
   <div class="tabs">
     <button class="tab on" onclick="setTab('ovr')">Overall</button>
@@ -267,13 +267,13 @@ function renderOvr(data){
       <td class="L nm">${p.name}${asBadge(p)}</td>
       <td class="L">${pill(p.team)}</td>
       <td class="gold">${p.ovr_score!=null?p.ovr_score:'—'}</td>
-      <td>${fc(p.AVG,.4,.2)}</td><td>${fc(p.SLG,.7,.35)}</td>
+      <td>${fc(p.AVG,.450,.275,.4,.2)}</td><td>${fc(p.SLG,.600,.400,.7,.35)}</td>
       <td>${p.PA||0}</td>
       <td>${p.BB||0}</td><td>${p.SO||0}</td>
       <td class="dim">${ip}</td>
-      <td>${fc(p.K6,15,8,1)}</td><td>${fc(p.BB6,null,6,1,true)}</td><td>${p.STR_PCT&&p.STR_PCT!=='None'?parseFloat(p.STR_PCT).toFixed(1)+'%':'—'}</td>
-      <td>${fc(p.WHIP,null,1.8,2,true)}</td>
-      <td>${fc(p.ERA,null,6,2,true)}</td>
+      <td>${fc(p.K6,15,8,1)}</td><td>${fc(p.BB6,6,9,1,true)}</td><td>${p.STR_PCT&&p.STR_PCT!=='None'?parseFloat(p.STR_PCT).toFixed(1)+'%':'—'}</td>
+      <td>${fc(p.WHIP,null,null,null,1.8,2,true)}</td>
+      <td>${fc(p.ERA,null,null,null,6,2,true)}</td>
     </tr>`;
   }).join('');
 }
@@ -295,7 +295,7 @@ function renderHit(data){
       <td class="L nm">${p.name}${asBadge(p)}</td>
       <td class="L">${pill(p.team)}</td>
       <td class="gold">${p.score||'—'}</td>
-      <td>${fc(p.AVG,.4,.2)}</td><td>${fc(p.SLG,.7,.35)}</td>
+      <td>${fc(p.AVG,.450,.275,.4,.2)}</td><td>${fc(p.SLG,.600,.400,.7,.35)}</td>
       <td>${p.PA||0}</td><td>${p.BB||0}</td><td>${p.SO||0}</td>
       <td>${p.R||0}</td><td>${sbVal}</td>
     </tr>`;
@@ -325,10 +325,10 @@ function renderPit(data){
       <td class="L">${pill(p.team)}</td>
       <td class="dim">${ipStr}</td>
       <td>${fc(p.K6,15,8,1)}</td>
-      <td>${fc(p.BB6,null,6,1,true)}</td>
+      <td>${fc(p.BB6,6,9,1,true)}</td>
       <td>${p.H6!==null&&p.H6!==undefined?parseFloat(p.H6).toFixed(1):'<span class="dim">—</span>'}</td>
       <td>${sp}</td>
-      <td>${fc(p.ERA,null,6,2,true)}</td>
+      <td>${fc(p.ERA,null,null,null,6,2,true)}</td>
     </tr>`;
   }).join('');
 }
@@ -378,58 +378,49 @@ function renderTeams(){
   var teams={};
   players.forEach(function(p){
     var t=p.team;
-    if(!teams[t])teams[t]={name:t,
-      ab:0,h:0,bb:0,so:0,sb:0,tb:0,pa:0,hbp:0,r:0,d2:0,d3:0,hr:0,
-      outs:0,strikes:0,pitches:0,sop:0,bbp:0,
-      ratings:[],pitRatings:[]};
+    if(!teams[t])teams[t]={name:t,ab:0,h:0,bb:0,so:0,sb:0,tb:0,pa:0,hbp:0,r:0,d2:0,d3:0,hr:0,outs:0,strikes:0,pitches:0,sop:0,bbp:0,ratings:[],pitRatings:[]};
     var d=teams[t];
-    d.ab+=p.AB||0; d.h+=p.H||0; d.bb+=p.BB||0; d.so+=p.SO||0;
-    d.sb+=p.SB||0; d.tb+=p.TB||0; d.pa+=p.PA||0; d.hbp+=p.HBP||0;
-    d.r+=p.R||0; d.d2+=p['2B']||0; d.d3+=p['3B']||0; d.hr+=p.HR||0;
-    if((p.PA||0)>=8) d.ratings.push(p.score||0);
+    d.ab+=p.AB||0;d.h+=p.H||0;d.bb+=p.BB||0;d.so+=p.SO||0;
+    d.sb+=p.SB||0;d.tb+=p.TB||0;d.pa+=p.PA||0;d.hbp+=p.HBP||0;
+    d.r+=p.R||0;d.d2+=p['2B']||0;d.d3+=p['3B']||0;d.hr+=p.HR||0;
+    if((p.PA||0)>=8)d.ratings.push(p.score||0);
     if((p.outs||0)>=9&&p.gpt_pit_score!=null){
-      d.outs+=p.outs||0;
-      d.strikes+=p.pit_strikes||0;
-      d.pitches+=p.pit_pitches||0;
-      d.sop+=p.pit_SO||0;
-      d.bbp+=p.pit_BB||0;
-      d.pitRatings.push(p.gpt_pit_score);
+      d.outs+=p.outs||0;d.strikes+=p.pit_strikes||0;d.pitches+=p.pit_pitches||0;
+      d.sop+=p.pit_SO||0;d.bbp+=p.pit_BB||0;d.pitRatings.push(p.gpt_pit_score);
     }
   });
   var rows=Object.values(teams).filter(function(d){return d.pa>0;});
   rows.forEach(function(d){
-    d.avg   = d.ab>0?d.h/d.ab:0;
-    d.slg   = d.ab>0?d.tb/d.ab:0;
-    d.obp   = d.pa>0?(d.h+d.bb+d.hbp)/d.pa:0;
-    d.kpct  = d.pa>0?d.so/d.pa:0;
-    d.bbpct = d.pa>0?d.bb/d.pa:0;
-    d.strpct= d.pitches>0?d.strikes/d.pitches*100:null;
-    d.hitRtg= d.ratings.length?d.ratings.reduce(function(a,b){return a+b;},0)/d.ratings.length:0;
-    d.pitRtg= d.pitRatings.length?d.pitRatings.reduce(function(a,b){return a+b;},0)/d.pitRatings.length:0;
-    d.ipDisp= d.outs>0?Math.floor(d.outs/3)+'.'+(d.outs%3):'--';
+    d.avg=d.ab>0?d.h/d.ab:0;d.slg=d.ab>0?d.tb/d.ab:0;
+    d.obp=d.pa>0?(d.h+d.bb+d.hbp)/d.pa:0;
+    d.kpct=d.pa>0?d.so/d.pa:0;d.bbpct=d.pa>0?d.bb/d.pa:0;
+    d.strpct=d.pitches>0?d.strikes/d.pitches*100:null;
+    d.hitRtg=d.ratings.length?d.ratings.reduce(function(a,b){return a+b;},0)/d.ratings.length:0;
+    d.pitRtg=d.pitRatings.length?d.pitRatings.reduce(function(a,b){return a+b;},0)/d.pitRatings.length:0;
+    d.ipDisp=d.outs>0?Math.floor(d.outs/3)+'.'+(d.outs%3):'--';
   });
   var f3=function(v){return v!=null?('.'+Math.round(v*1000).toString().padStart(3,'0')):'--';};
   var f1=function(v){return v!=null?v.toFixed(1):'--';};
   var fp=function(v){return v!=null?(v*100).toFixed(1)+'%':'--';};
   var fr=function(v){return v>0?v.toFixed(1):'--';};
   var cols=[
-    {k:'rank',   lbl:'#',       div:0,fmt:function(d,i){return i+1;}},
-    {k:'name',   lbl:'Team',    div:0,fmt:function(d){return d.name;}},
-    {k:'hitRtg', lbl:'Hit Rtg', div:0,fmt:function(d){return fr(d.hitRtg);}},
-    {k:'avg',    lbl:'AVG',     div:0,fmt:function(d){return f3(d.avg);}},
-    {k:'obp',    lbl:'OBP',     div:0,fmt:function(d){return f3(d.obp);}},
-    {k:'slg',    lbl:'SLG',     div:0,fmt:function(d){return f3(d.slg);}},
-    {k:'r',      lbl:'R',       div:0,fmt:function(d){return d.r;}},
-    {k:'d2',     lbl:'2B',      div:0,fmt:function(d){return d.d2;}},
-    {k:'d3',     lbl:'3B',      div:0,fmt:function(d){return d.d3;}},
-    {k:'hr',     lbl:'HR',      div:0,fmt:function(d){return d.hr;}},
-    {k:'kpct',   lbl:'K%',      div:0,fmt:function(d){return fp(d.kpct);}},
-    {k:'bbpct',  lbl:'BB%',     div:0,fmt:function(d){return fp(d.bbpct);}},
-    {k:'pitRtg', lbl:'Pit Rtg', div:1,fmt:function(d){return fr(d.pitRtg);}},
-    {k:'ipDisp', lbl:'IP',      div:0,fmt:function(d){return d.ipDisp;}},
-    {k:'sop',    lbl:'K',       div:0,fmt:function(d){return d.sop;}},
-    {k:'bbp',    lbl:'BB',      div:0,fmt:function(d){return d.bbp;}},
-    {k:'strpct', lbl:'STR%',    div:0,fmt:function(d){return f1(d.strpct);}},
+    {k:'rank',lbl:'#',div:0,fmt:function(d,i){return i+1;}},
+    {k:'name',lbl:'Team',div:0,fmt:function(d){return d.name;}},
+    {k:'hitRtg',lbl:'Hit Rtg',div:0,fmt:function(d){return fr(d.hitRtg);}},
+    {k:'avg',lbl:'AVG',div:0,fmt:function(d){return f3(d.avg);}},
+    {k:'obp',lbl:'OBP',div:0,fmt:function(d){return f3(d.obp);}},
+    {k:'slg',lbl:'SLG',div:0,fmt:function(d){return f3(d.slg);}},
+    {k:'r',lbl:'R',div:0,fmt:function(d){return d.r;}},
+    {k:'d2',lbl:'2B',div:0,fmt:function(d){return d.d2;}},
+    {k:'d3',lbl:'3B',div:0,fmt:function(d){return d.d3;}},
+    {k:'hr',lbl:'HR',div:0,fmt:function(d){return d.hr;}},
+    {k:'kpct',lbl:'K%',div:0,fmt:function(d){return fp(d.kpct);}},
+    {k:'bbpct',lbl:'BB%',div:0,fmt:function(d){return fp(d.bbpct);}},
+    {k:'pitRtg',lbl:'Pit Rtg',div:1,fmt:function(d){return fr(d.pitRtg);}},
+    {k:'ipDisp',lbl:'IP',div:0,fmt:function(d){return d.ipDisp;}},
+    {k:'sop',lbl:'K',div:0,fmt:function(d){return d.sop;}},
+    {k:'bbp',lbl:'BB',div:0,fmt:function(d){return d.bbp;}},
+    {k:'strpct',lbl:'STR%',div:0,fmt:function(d){return f1(d.strpct);}},
   ];
   rows.sort(function(a,b){return ts.d*((a[ts.k]||0)-(b[ts.k]||0));});
   var th=cols.map(function(c,i){
@@ -440,7 +431,7 @@ function renderTeams(){
     var arr=c.k===ts.k?(ts.d===-1?' \u2193':' \u2191'):'';
     var oc='';
     if(c.k!=='rank'&&c.k!=='name'){
-      oc=' onclick="if(window._teamSort.k===\''+c.k+'\'){window._teamSort.d*=-1;}else{window._teamSort.k=\''+c.k+'\';window._teamSort.d=-1;}renderTeams()"';
+      oc=' onclick="window._teamSort.k===\''+c.k+'\'?window._teamSort.d*=-1:(window._teamSort.k=\''+c.k+'\',window._teamSort.d=-1);renderTeams()"';
     }
     return '<th style="'+bdr+bg+cur+'padding:6px 6px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:'+al+';white-space:nowrap"'+oc+'>'+c.lbl+arr+'</th>';
   }).join('');
@@ -524,8 +515,8 @@ function openModal(name,tk){
       '<div class="sr"><span class="sl">IP</span><span class="sv">'+ipS+'</span></div>'+
       '<div class="sr"><span class="sl">K</span><span class="sv">'+(p.pit_SO||0)+'</span></div>'+
       '<div class="sr"><span class="sl">Strike%</span><span class="sv" style="color:'+(p.STR_PCT!=null&&p.STR_PCT>=60?'var(--hi)':p.STR_PCT!=null&&p.STR_PCT<50?'var(--lo)':'inherit')+'">'+sp+'</span></div>'+
-      '<div class="sr"><span class="sl">K/6</span><span class="sv">'+fc(p.K6,15,8,1)+'</span></div>'+
-      '<div class="sr"><span class="sl">BB/6</span><span class="sv">'+fc(p.BB6,null,6,1,true)+'</span></div>'+
+      '<div class="sr"><span class="sl">K/6</span><span class="sv">'+fc(p.K6,10,7,1)+'</span></div>'+
+      '<div class="sr"><span class="sl">BB/6</span><span class="sv">'+fc(p.BB6,6,9,1,true)+'</span></div>'+
       '<div class="sr"><span class="sl">H/6</span><span class="sv">'+(p.H6!=null?parseFloat(p.H6).toFixed(1):'--')+'</span></div>'+
       '<div class="sr"><span class="sl">WHIP</span><span class="sv">'+(p.WHIP?parseFloat(p.WHIP).toFixed(2):'--')+'</span></div>'+
       '<div class="sr"><span class="sl">ERA/6</span><span class="sv">'+(p.ERA?parseFloat(p.ERA).toFixed(2):'--')+'</span></div>'+
