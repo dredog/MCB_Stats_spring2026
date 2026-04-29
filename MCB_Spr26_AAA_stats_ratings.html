@@ -87,7 +87,7 @@ tr.as-red-row td{background:rgba(204,34,34,0.09)!important}
 <div class="hdr">
   <div class="hdr-top">
     <div class="title">MCB AAA League</div>
-    <div class="subtitle">Season Stats - 2026 - Updated Apr 29 2026 15:07</div>
+    <div class="subtitle">Season Stats - 2026 - Updated Apr 29 2026 16:59</div>
   </div>
   <div class="tabs">
     <button class="tab on" onclick="setTab('ovr')">Overall</button>
@@ -274,13 +274,13 @@ function renderOvr(data){
       <td class="L nm">${p.name}${asBadge(p)}</td>
       <td class="L">${pill(p.team)}</td>
       <td class="gold">${p.ovr_score!=null?p.ovr_score:'—'}</td>
-      <td>${fc(p.AVG,.450,.275,.4,.2)}</td><td>${fc(p.SLG,.600,.400,.7,.35)}</td>
+      <td>${fc(p.AVG,.450,.275)}</td><td>${fc(p.SLG,.600,.400)}</td>
       <td>${p.PA||0}</td>
       <td>${p.BB||0}</td><td>${p.SO||0}</td>
       <td class="dim">${ip}</td>
-      <td>${fc(p.K6,15,8,1)}</td><td>${fc(p.BB6,6,9,1,true)}</td><td>${p.STR_PCT&&p.STR_PCT!=='None'?parseFloat(p.STR_PCT).toFixed(1)+'%':'—'}</td>
-      <td>${fc(p.WHIP,null,null,null,1.8,2,true)}</td>
-      <td>${fc(p.ERA,null,null,null,6,2,true)}</td>
+      <td>${fc(p.K6,15,8,1)}</td><td>${fc(p.BB6,null,6,1,true)}</td><td>${p.STR_PCT&&p.STR_PCT!=='None'?parseFloat(p.STR_PCT).toFixed(1)+'%':'—'}</td>
+      <td>${fc(p.WHIP,null,null,2,true)}</td>
+      <td>${fc(p.ERA,null,null,2,true)}</td>
     </tr>`;
   }).join('');
 }
@@ -302,7 +302,7 @@ function renderHit(data){
       <td class="L nm">${p.name}${asBadge(p)}</td>
       <td class="L">${pill(p.team)}</td>
       <td class="gold">${p.score||'—'}</td>
-      <td>${fc(p.AVG,.450,.275,.4,.2)}</td><td>${fc(p.SLG,.600,.400,.7,.35)}</td>
+      <td>${fc(p.AVG,.450,.275)}</td><td>${fc(p.SLG,.600,.400)}</td>
       <td>${p.PA||0}</td><td>${p.BB||0}</td><td>${p.SO||0}</td>
       <td>${p.R||0}</td><td>${sbVal}</td>
     </tr>`;
@@ -332,10 +332,10 @@ function renderPit(data){
       <td class="L">${pill(p.team)}</td>
       <td class="dim">${ipStr}</td>
       <td>${fc(p.K6,15,8,1)}</td>
-      <td>${fc(p.BB6,6,9,1,true)}</td>
+      <td>${fc(p.BB6,null,6,1,true)}</td>
       <td>${p.H6!==null&&p.H6!==undefined?parseFloat(p.H6).toFixed(1):'<span class="dim">—</span>'}</td>
       <td>${sp}</td>
-      <td>${fc(p.ERA,null,null,null,6,2,true)}</td>
+      <td>${fc(p.ERA,null,null,2,true)}</td>
     </tr>`;
   }).join('');
 }
