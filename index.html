@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCB Spring 2026 Stats</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Sans+3:wght@300;400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0b0e14;
+    color: #e8eaf0;
+    font-family: 'Source Sans 3', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    background: #11151e;
+    border-bottom: 2px solid #f5c518;
+    padding: 20px 32px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #f5c518;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: #7a7e8a;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  main {
+    width: 100%;
+    max-width: 860px;
+    padding: 48px 24px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .section-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    color: #7a7e8a;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    margin-top: 8px;
+  }
+
+  .card {
+    background: #161b26;
+    border: 1px solid #252c3d;
+    border-radius: 8px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color .15s, background .15s;
+  }
+
+  .card:hover {
+    background: #1c2235;
+    border-color: #3a4460;
+  }
+
+  .card-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    flex-shrink: 0;
+  }
+
+  .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .card-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #e8eaf0;
+    letter-spacing: .04em;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: #7a7e8a;
+  }
+
+  .card-arrow {
+    font-size: 20px;
+    color: #3a4460;
+    transition: color .15s;
+  }
+
+  .card:hover .card-arrow {
+    color: #f5c518;
+  }
+
+  /* League accent colors */
+  .aa-icon     { background: #1a2a1a; color: #4caf50; border: 1.5px solid #4caf50; }
+  .aaa-icon    { background: #1a1f2a; color: #5b8dee; border: 1.5px solid #5b8dee; }
+  .maj-icon    { background: #2a1a1a; color: #f5c518; border: 1.5px solid #f5c518; }
+
+  .aa-card:hover  { border-color: #4caf50; }
+  .aaa-card:hover { border-color: #5b8dee; }
+  .maj-card:hover { border-color: #f5c518; }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .tag-aa  { background: #1a2a1a; color: #4caf50; border: 1px solid #4caf50; }
+  .tag-aaa { background: #1a1f2a; color: #5b8dee; border: 1px solid #5b8dee; }
+  .tag-maj { background: #2a1a1a; color: #f5c518; border: 1px solid #f5c518; }
+
+  footer {
+    margin-top: auto;
+    padding: 20px;
+    font-size: 11px;
+    color: #3a4460;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">MCB Baseball</div>
+  <div class="subtitle">Spring 2026 &nbsp;·&nbsp; Season Stats &amp; Ratings</div>
+</header>
+
+<main>
+  <div class="section-label">Select a league</div>
+
+  <a class="card aa-card" href="MCB_Spr26_AA_stats_ratings.html">
+    <div class="card-icon aa-icon">AA</div>
+    <div class="card-body">
+      <div class="card-title">Double-A League <span class="tag tag-aa">9U</span></div>
+      <div class="card-desc">11 teams &nbsp;·&nbsp; Hitting, pitching &amp; overall ratings &nbsp;·&nbsp; All-star tracking</div>
+    </div>
+    <div class="card-arrow">›</div>
+  </a>
+
+  <a class="card aaa-card" href="MCB_Spr26_AAA_stats_ratings.html">
+    <div class="card-icon aaa-icon">AAA</div>
+    <div class="card-body">
+      <div class="card-title">Triple-A League <span class="tag tag-aaa">10U / 11U</span></div>
+      <div class="card-desc">14 teams &nbsp;·&nbsp; Hitting, pitching &amp; overall ratings &nbsp;·&nbsp; All-star tracking</div>
+    </div>
+    <div class="card-arrow">›</div>
+  </a>
+
+  <a class="card maj-card" href="MCB_Spr26_Majors_stats_ratings.html">
+    <div class="card-icon maj-icon">MAJ</div>
+    <div class="card-body">
+      <div class="card-title">Majors League <span class="tag tag-maj">12U</span></div>
+      <div class="card-desc">10 teams &nbsp;·&nbsp; Hitting, pitching &amp; overall ratings &nbsp;·&nbsp; All-star tracking</div>
+    </div>
+    <div class="card-arrow">›</div>
+  </a>
+
+</main>
+
+<footer>
+  MCB Spring 2026 &nbsp;·&nbsp; Stats scraped from GameChanger &nbsp;·&nbsp; Not affiliated with MCB or GameChanger
+</footer>
+
+</body>
+</html>
