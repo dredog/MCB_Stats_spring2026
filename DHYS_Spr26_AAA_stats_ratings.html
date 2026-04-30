@@ -537,7 +537,7 @@ function renderGl(){
     if(q&&!tm.toLowerCase().includes(q)&&!g.opponent.toLowerCase().includes(q))return false;
     return true;
   });
-  document.getElementById('thead').innerHTML='<tr><th class="L">Team</th><th class="L">Date</th><th class="L">Opponent</th><th>RS</th><th>RA</th><th class="L">Result</th></tr>';
+  document.getElementById('thead').innerHTML='<tr><th class="L">Team</th><th class="L">Date</th><th class="L">Opponent</th><th>RS</th><th>RA</th><th class="L">Result</th><th></th></tr>';
   document.getElementById('tbody').innerHTML=gs.map(function(g){
     const tm=TN[g.team_key]||g.team_key;
     const rs=g.score_rs!=null?g.score_rs:'--';
@@ -548,7 +548,7 @@ function renderGl(){
       else if(g.score_rs<g.score_opp)res='<span class="lo">L</span>';
       else res='T';
     }
-    return '<tr><td class="L">'+pill(tm)+'</td><td class="L dim" style="font-size:12px">'+g.date+'</td><td class="L">'+g.opponent+'</td><td style="font-family:Oswald,sans-serif;font-weight:600">'+rs+'</td><td style="font-family:Oswald,sans-serif;font-weight:600">'+ra+'</td><td>'+res+'</td></tr>';
+    return '<tr><td class="L">'+pill(tm)+'</td><td class="L dim" style="font-size:12px">'+g.date+'</td><td class="L">'+g.opponent+'</td><td style="font-family:Oswald,sans-serif;font-weight:600">'+rs+'</td><td style="font-family:Oswald,sans-serif;font-weight:600">'+ra+'</td><td>'+res+'</td>'+(g.url?'<td><a href="'+g.url+'" target="_blank" style="font-size:10px;color:var(--muted);text-decoration:none" title="Box Score">&#9654;</a></td>':'<td></td>')+'</tr>';
   }).join('');
 }
 
