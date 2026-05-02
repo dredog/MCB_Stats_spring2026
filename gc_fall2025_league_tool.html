@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCB AA Fall 2025 League Stats</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0e14;--panel:#131720;--card:#1a2030;--border:#252d3d;--text:#e8eaf0;--muted:#5a6480;--gold:#f0b429;--blue:#4a9eff;--green:#3ecf8e;--red:#f56565;--purple:#b794f4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Source Sans 3',sans-serif;font-size:14px;min-height:100vh}
+.hdr{background:linear-gradient(135deg,#0d1526,#131720);border-bottom:2px solid var(--gold);padding:14px 20px 0}
+.hdr-top{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+.title{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase}
+.subtitle{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.tabs{display:flex;gap:2px}
+.tab{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;padding:9px 16px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .15s}
+.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.tab:hover:not(.on){color:var(--text)}
+.ctrl{background:var(--panel);border-bottom:1px solid var(--border);padding:9px 20px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.ctrl input[type=text]{background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'Source Sans 3',sans-serif;font-size:13px;padding:6px 11px;border-radius:6px;width:170px;outline:none;transition:border .15s}
+.ctrl input[type=text]:focus{border-color:var(--gold)}
+.ctrl select{background:var(--card);border:1px solid var(--border);color:var(--text);font-size:13px;padding:6px 9px;border-radius:6px;outline:none;cursor:pointer}
+.flt{display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 9px}
+.flt label{font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:.8px;white-space:nowrap}
+.flt input[type=range]{width:65px;accent-color:var(--gold)}
+.flt span{font-size:12px;font-family:'Oswald',sans-serif;color:var(--gold);min-width:20px}
+.note-bar{background:#1a1400;border-bottom:1px solid #3d2e00;padding:6px 20px;font-size:11px;color:#c9920a}
+.tbl-wrap{overflow-x:auto;padding:0 20px 20px}
+table{width:100%;border-collapse:collapse;font-family:'Oswald',sans-serif}
+thead th{position:sticky;top:0;background:var(--card);padding:8px 10px;text-align:right;font-size:10px;font-weight:600;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap;z-index:10}
+thead th:hover{color:var(--text)}
+thead th.L{text-align:left}
+thead th.active{color:var(--gold)}
+tbody tr{border-bottom:1px solid rgba(37,45,61,.5);transition:background .1s;cursor:pointer}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+td{padding:7px 10px;text-align:right;white-space:nowrap;font-size:13px}
+td.L{text-align:left}
+td.rk{color:var(--muted);font-size:11px;width:34px}
+td.nm{font-weight:600;font-size:13px;letter-spacing:.2px}
+.pill{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600}
+.hi{color:var(--green);font-weight:700}
+.lo{color:var(--red)}
+.dim{color:var(--muted)}
+.gold{color:var(--gold);font-weight:700}
+.def-up{color:var(--blue);font-size:9px;vertical-align:super;display:none}
+.def-dn{color:var(--red);font-size:9px;vertical-align:super}
+.rs-star{color:#cc3333;font-size:9px;vertical-align:super}
+.sb-na{color:var(--muted);font-size:10px;font-style:italic}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:12px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:22px;position:relative}
+.modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--text)}
+.modal-name{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700}
+.modal-team{font-size:12px;margin-top:2px;margin-bottom:16px}
+.modal-ranks{display:flex;gap:8px;margin-bottom:16px}
+.rc{flex:1;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:9px;text-align:center}
+.rc-l{font-size:9px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:.7px;text-transform:uppercase}
+.rc-v{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;color:var(--gold)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:12px}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-bottom:1px solid var(--border)}
+.sr:last-child{border-bottom:none}
+.sl{font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:.5px;text-transform:uppercase}
+.sv{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600}
+.sec{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);margin:12px 0 7px;border-bottom:1px solid var(--border);padding-bottom:5px}
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+.qf{color:var(--green)}.qp{color:var(--gold)}.qm{color:var(--red)}
+
+.as-badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;margin-left:4px;vertical-align:middle;letter-spacing:0.3px}
+.as-gold{background:#FFD700;color:#000}
+.as-blue{background:#2a5caa;color:#fff}
+.as-white{background:#ccc;color:#000;border:1px solid #aaa}
+.as-red{background:#cc2222;color:#fff}
+tr.as-gold-row td{background:rgba(255,215,0,0.10)!important}
+tr.as-blue-row td{background:rgba(42,92,170,0.09)!important}
+tr.as-white-row td{background:rgba(180,180,180,0.13)!important}
+tr.as-red-row td{background:rgba(204,34,34,0.09)!important}
+.as-filter-btn{padding:4px 10px;border-radius:4px;border:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;background:var(--card);color:var(--text)}
+.as-filter-btn.active-gold{background:#FFD700;color:#000;border-color:#c8a800}
+.as-filter-btn.active-blue{background:#2a5caa;color:#fff;border-color:#1a3c7a}
+.as-filter-btn.active-white{background:#ccc;color:#000;border-color:#aaa}
+.as-filter-btn.active-red{background:#cc2222;color:#fff;border-color:#991111}
+</style>
+<style>.hi{color:var(--green)!important}.lo{color:var(--red)!important}.modal-bg{display:none!important;position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important;background:rgba(0,0,0,.78)!important;z-index:9999!important;align-items:center!important;justify-content:center!important}.modal-bg.open{display:flex!important}.modal{background:var(--panel);border:1px solid var(--border);border-radius:12px;width:520px;max-width:95vw;max-height:88vh;overflow-y:auto;padding:22px;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.6)}</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="title">MCB AA Fall 2025</div>
+    <div class="subtitle">Season Stats &middot; 2026 &nbsp; <span style="opacity:.7;font-size:11px">Stats through: May 02 2026 13:09</span></div>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="setTab('ovr')">Overall</button>
+    <button class="tab" onclick="setTab('hit')">Hitting</button>
+    <button class="tab" onclick="setTab('pit')">Pitching</button>
+    <button class="tab" onclick="setTab('teams')">Teams</button>
+    <button class="tab" onclick="setTab('bracket')">Playoffs</button>
+    <button class="tab" onclick="setTab('gl')">Game Log</button>
+  </div>
+</div>
+<div class="note-bar" id="note-bar">
+  94 players from 11 teams &nbsp;&middot;&nbsp; 99 games scraped &nbsp;&middot;&nbsp; Min 8 PA hitting &nbsp;&middot;&nbsp; 3.0 IP pitching
+</div>
+<!-- hidden team select required by getData() -->
+<select id="team" style="display:none"></select>
+<div class="ctrl">
+  <input type="text" id="srch" placeholder="Search player or team..." oninput="render()">
+  <select onchange="filterTeam(this.value)" style="background:var(--card);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px;font-size:13px">
+    <option value="">All Teams</option>
+    <option value='Tin Caps'>Tin Caps</option>
+    <option value='Marauders'>Marauders</option>
+    <option value='Mussels'>Mussels</option>
+    <option value='Tide'>Tide</option>
+    <option value='Hooks'>Hooks</option>
+    <option value='Iron Birds'>Iron Birds</option>
+    <option value='River Dogs'>River Dogs</option>
+    <option value='Red Wings'>Red Wings</option>
+    <option value='Hot Rods'>Hot Rods</option>
+    <option value='Timber Rattlers'>Timber Rattlers</option>
+    <option value='Bulls'>Bulls</option>
+  </select>
+  <div class="flt" id="pa-flt">
+    <label>Min PA</label>
+    <input type="range" id="mpa" min="0" max="40" step="5" value="8"
+           oninput="document.getElementById('mpav').textContent=this.value;render()">
+    <span id="mpav">8</span>
+  </div>
+  <div class="flt" id="ip-flt" style="display:none">
+    <label>Min IP</label>
+    <input type="range" id="mip" min="0" max="15" step="1" value="3"
+           oninput="document.getElementById('mipv').textContent=this.value;render()">
+    <span id="mipv">3</span>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap" id="as-filter-bar">
+    <button class="as-filter-btn" id="asf-gold" onclick="setAsFilter('Gold')" > Gold Sox </button>
+    <button class="as-filter-btn" id="asf-blue" onclick="setAsFilter('Blue')" > Blue Sox </button>
+    <button class="as-filter-btn" id="asf-white" onclick="setAsFilter('White')" > White Sox </button>
+    <button class="as-filter-btn" id="asf-red" onclick="setAsFilter('Red')" > Red Sox </button>
+    <button class="as-filter-btn" id="asf-all" onclick="setAsFilter(null)" style="font-weight:400;color:var(--muted)">All players</button>
+  </div>
+</div>
+<div class="tbl-wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+<div id="bracket-view" style="display:none"></div>
+<div id="teams-view" style="display:none;padding:12px 16px"></div>
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+<script>
+const PLAYERS=[{"id":0,"name":"Max Asbury","team":"Tin Caps","team_key":"TIN_CAPS","AB":17,"H":5,"BB":9,"HBP":1,"SO":4,"R":8,"SB":7,"TB":6,"PA":27,"2B":2,"3B":0,"HR":0,"AVG":0.294,"SLG":0.353,"OBP":0.556,"OPS":0.909,"score":31.22,"gpt_hit_score":31.22,"gpt_pit_score":15.5,"ovr_score":26.5,"outs":5,"IP":"1.2","ip_val":1.6667,"ERA":39.6,"K6":7.2,"BB6":50.4,"H6":10.8,"WHIP":10.2,"STR_PCT":37.9,"pit_SO":2,"pit_BB":14,"pit_BF":0,"pit_H":3,"pit_ER":11,"pit_pitches":95,"pit_strikes":36,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":48,"pit_rank":61,"gpt_rank":48,"ovr_rank":54},{"id":1,"name":"Bradford Smith","team":"Tin Caps","team_key":"TIN_CAPS","AB":9,"H":0,"BB":12,"HBP":2,"SO":6,"R":5,"SB":6,"TB":0,"PA":23,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.609,"OPS":0.609,"score":15.05,"gpt_hit_score":15.05,"gpt_pit_score":35.1,"ovr_score":21.06,"outs":7,"IP":"2.1","ip_val":2.3333,"ERA":20.57,"K6":15.4,"BB6":28.3,"H6":5.1,"WHIP":5.57,"STR_PCT":40.8,"pit_SO":6,"pit_BB":11,"pit_BF":0,"pit_H":2,"pit_ER":8,"pit_pitches":103,"pit_strikes":42,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":73,"pit_rank":32,"gpt_rank":73,"ovr_rank":64},{"id":2,"name":"Tatum Cohron","team":"Tin Caps","team_key":"TIN_CAPS","AB":11,"H":4,"BB":10,"HBP":5,"SO":2,"R":12,"SB":15,"TB":4,"PA":26,"2B":0,"3B":0,"HR":0,"AVG":0.364,"SLG":0.364,"OBP":0.731,"OPS":1.095,"score":41.57,"gpt_hit_score":41.57,"gpt_pit_score":49.4,"ovr_score":43.92,"outs":15,"IP":"5.0","ip_val":5.0,"ERA":12.0,"K6":12.0,"BB6":10.8,"H6":14.4,"WHIP":4.2,"STR_PCT":58.1,"pit_SO":10,"pit_BB":9,"pit_BF":0,"pit_H":12,"pit_ER":10,"pit_pitches":74,"pit_strikes":43,"pit_per_ip":14.8,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":29,"pit_rank":16,"gpt_rank":29,"ovr_rank":25},{"id":3,"name":"Miles Brown","team":"Tin Caps","team_key":"TIN_CAPS","AB":16,"H":10,"BB":3,"HBP":0,"SO":1,"R":7,"SB":7,"TB":14,"PA":19,"2B":2,"3B":1,"HR":0,"AVG":0.625,"SLG":0.875,"OBP":0.684,"OPS":1.559,"score":53.88,"gpt_hit_score":53.88,"gpt_pit_score":59.6,"ovr_score":55.6,"outs":20,"IP":"6.2","ip_val":6.6667,"ERA":1.8,"K6":12.6,"BB6":9.9,"H6":4.5,"WHIP":2.4,"STR_PCT":52.5,"pit_SO":14,"pit_BB":11,"pit_BF":0,"pit_H":5,"pit_ER":2,"pit_pitches":162,"pit_strikes":85,"pit_per_ip":24.3,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":14,"pit_rank":7,"gpt_rank":14,"ovr_rank":8},{"id":4,"name":"Julian Shih","team":"Tin Caps","team_key":"TIN_CAPS","AB":11,"H":2,"BB":10,"HBP":1,"SO":5,"R":9,"SB":8,"TB":5,"PA":22,"2B":1,"3B":1,"HR":0,"AVG":0.182,"SLG":0.455,"OBP":0.591,"OPS":1.046,"score":32.36,"gpt_hit_score":32.36,"gpt_pit_score":16.2,"ovr_score":27.51,"outs":8,"IP":"2.2","ip_val":2.6667,"ERA":13.5,"K6":2.2,"BB6":20.2,"H6":6.8,"WHIP":4.5,"STR_PCT":38.9,"pit_SO":1,"pit_BB":9,"pit_BF":0,"pit_H":3,"pit_ER":6,"pit_pitches":90,"pit_strikes":35,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":44,"pit_rank":60,"gpt_rank":44,"ovr_rank":49},{"id":5,"name":"Julian Rowell","team":"Tin Caps","team_key":"TIN_CAPS","AB":16,"H":6,"BB":7,"HBP":3,"SO":3,"R":8,"SB":13,"TB":7,"PA":26,"2B":1,"3B":0,"HR":0,"AVG":0.375,"SLG":0.438,"OBP":0.615,"OPS":1.053,"score":38.6,"gpt_hit_score":38.6,"gpt_pit_score":32.6,"ovr_score":36.8,"outs":14,"IP":"4.2","ip_val":4.6667,"ERA":12.86,"K6":9.0,"BB6":14.1,"H6":6.4,"WHIP":3.43,"STR_PCT":43.8,"pit_SO":7,"pit_BB":11,"pit_BF":0,"pit_H":5,"pit_ER":10,"pit_pitches":130,"pit_strikes":57,"pit_per_ip":27.9,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":33,"pit_rank":33,"gpt_rank":33,"ovr_rank":36},{"id":6,"name":"Chase Owens","team":"Tin Caps","team_key":"TIN_CAPS","AB":6,"H":0,"BB":6,"HBP":2,"SO":4,"R":3,"SB":4,"TB":0,"PA":14,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.571,"OPS":0.571,"score":11.96,"gpt_hit_score":11.96,"gpt_pit_score":18.0,"ovr_score":13.77,"outs":7,"IP":"2.1","ip_val":2.3333,"ERA":15.43,"K6":7.7,"BB6":18.0,"H6":10.3,"WHIP":4.71,"STR_PCT":38.8,"pit_SO":3,"pit_BB":7,"pit_BF":0,"pit_H":4,"pit_ER":6,"pit_pitches":80,"pit_strikes":31,"pit_per_ip":null,"pit_HBP":0,"G":7,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":85,"pit_rank":57,"gpt_rank":85,"ovr_rank":79},{"id":7,"name":"Luke Oguntebi","team":"Tin Caps","team_key":"TIN_CAPS","AB":13,"H":5,"BB":9,"HBP":5,"SO":8,"R":13,"SB":12,"TB":6,"PA":27,"2B":1,"3B":0,"HR":0,"AVG":0.385,"SLG":0.462,"OBP":0.704,"OPS":1.166,"score":37.73,"gpt_hit_score":37.73,"gpt_pit_score":21.4,"ovr_score":32.83,"outs":6,"IP":"2.0","ip_val":2.0,"ERA":27.0,"K6":15.0,"BB6":42.0,"H6":9.0,"WHIP":8.5,"STR_PCT":null,"pit_SO":5,"pit_BB":14,"pit_BF":0,"pit_H":3,"pit_ER":9,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":36,"pit_rank":53,"gpt_rank":36,"ovr_rank":41},{"id":8,"name":"Henry Cone","team":"Tin Caps","team_key":"TIN_CAPS","AB":14,"H":5,"BB":9,"HBP":0,"SO":5,"R":7,"SB":11,"TB":6,"PA":23,"2B":1,"3B":0,"HR":0,"AVG":0.357,"SLG":0.429,"OBP":0.609,"OPS":1.038,"score":36.39,"gpt_hit_score":36.39,"gpt_pit_score":24.7,"ovr_score":32.88,"outs":5,"IP":"1.2","ip_val":1.6667,"ERA":25.2,"K6":10.8,"BB6":32.4,"H6":7.2,"WHIP":6.6,"STR_PCT":38.6,"pit_SO":3,"pit_BB":9,"pit_BF":0,"pit_H":2,"pit_ER":7,"pit_pitches":83,"pit_strikes":32,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":38,"pit_rank":51,"gpt_rank":38,"ovr_rank":40},{"id":9,"name":"Brayden Cope","team":"Tin Caps","team_key":"TIN_CAPS","AB":14,"H":1,"BB":9,"HBP":1,"SO":9,"R":5,"SB":5,"TB":1,"PA":24,"2B":0,"3B":0,"HR":0,"AVG":0.071,"SLG":0.071,"OBP":0.458,"OPS":0.529,"score":10.98,"gpt_hit_score":10.98,"gpt_pit_score":7.4,"ovr_score":9.91,"outs":3,"IP":"1.0","ip_val":1.0,"ERA":54.0,"K6":6.0,"BB6":48.0,"H6":30.0,"WHIP":13.0,"STR_PCT":33.3,"pit_SO":1,"pit_BB":8,"pit_BF":0,"pit_H":5,"pit_ER":9,"pit_pitches":69,"pit_strikes":23,"pit_per_ip":null,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":87,"pit_rank":75,"gpt_rank":87,"ovr_rank":87},{"id":10,"name":"Winn Glisson","team":"Tin Caps","team_key":"TIN_CAPS","AB":6,"H":0,"BB":13,"HBP":1,"SO":5,"R":7,"SB":6,"TB":0,"PA":20,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.7,"OPS":0.7,"score":18.7,"gpt_hit_score":18.7,"gpt_pit_score":12.9,"ovr_score":16.96,"outs":1,"IP":"0.1","ip_val":0.3333,"ERA":90.0,"K6":0.0,"BB6":90.0,"H6":0.0,"WHIP":15.0,"STR_PCT":17.2,"pit_SO":0,"pit_BB":5,"pit_BF":0,"pit_H":0,"pit_ER":5,"pit_pitches":29,"pit_strikes":5,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":67,"pit_rank":65,"gpt_rank":67,"ovr_rank":75},{"id":0,"name":"Austin L","team":"Marauders","team_key":"MARAUDERS","AB":14,"H":9,"BB":14,"HBP":4,"SO":2,"R":17,"SB":16,"TB":10,"PA":32,"2B":1,"3B":0,"HR":0,"AVG":0.643,"SLG":0.714,"OBP":0.844,"OPS":1.558,"score":62.81,"gpt_hit_score":62.81,"gpt_pit_score":55.2,"ovr_score":60.53,"outs":26,"IP":"8.2","ip_val":8.6667,"ERA":10.38,"K6":13.8,"BB6":6.2,"H6":6.2,"WHIP":2.08,"STR_PCT":47.4,"pit_SO":20,"pit_BB":9,"pit_BF":0,"pit_H":9,"pit_ER":15,"pit_pitches":190,"pit_strikes":90,"pit_per_ip":21.9,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":1,"pit_rank":10,"gpt_rank":1,"ovr_rank":3},{"id":1,"name":"Nolan T","team":"Marauders","team_key":"MARAUDERS","AB":22,"H":10,"BB":6,"HBP":4,"SO":5,"R":12,"SB":15,"TB":12,"PA":32,"2B":0,"3B":1,"HR":0,"AVG":0.455,"SLG":0.545,"OBP":0.625,"OPS":1.17,"score":42.96,"gpt_hit_score":42.96,"gpt_pit_score":69.1,"ovr_score":50.8,"outs":32,"IP":"10.2","ip_val":10.6667,"ERA":5.62,"K6":10.7,"BB6":4.5,"H6":9.6,"WHIP":2.34,"STR_PCT":59.0,"pit_SO":19,"pit_BB":8,"pit_BF":0,"pit_H":17,"pit_ER":10,"pit_pitches":251,"pit_strikes":148,"pit_per_ip":23.5,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":27,"pit_rank":1,"gpt_rank":27,"ovr_rank":16},{"id":2,"name":"Christopher E","team":"Marauders","team_key":"MARAUDERS","AB":16,"H":7,"BB":11,"HBP":0,"SO":7,"R":11,"SB":0,"TB":7,"PA":27,"2B":0,"3B":0,"HR":0,"AVG":0.438,"SLG":0.438,"OBP":0.667,"OPS":1.105,"score":34.85,"gpt_hit_score":34.85,"gpt_pit_score":25.7,"ovr_score":32.1,"outs":3,"IP":"1.0","ip_val":1.0,"ERA":24.0,"K6":12.0,"BB6":42.0,"H6":6.0,"WHIP":8.0,"STR_PCT":37.5,"pit_SO":2,"pit_BB":7,"pit_BF":0,"pit_H":1,"pit_ER":4,"pit_pitches":56,"pit_strikes":21,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":40,"pit_rank":48,"gpt_rank":40,"ovr_rank":42},{"id":3,"name":"Carter Y","team":"Marauders","team_key":"MARAUDERS","AB":18,"H":6,"BB":11,"HBP":0,"SO":7,"R":8,"SB":13,"TB":8,"PA":29,"2B":2,"3B":0,"HR":0,"AVG":0.333,"SLG":0.444,"OBP":0.586,"OPS":1.03,"score":36.37,"gpt_hit_score":36.37,"gpt_pit_score":52.9,"ovr_score":41.33,"outs":22,"IP":"7.1","ip_val":7.3333,"ERA":8.18,"K6":13.1,"BB6":10.6,"H6":4.1,"WHIP":2.45,"STR_PCT":48.4,"pit_SO":16,"pit_BB":13,"pit_BF":0,"pit_H":5,"pit_ER":10,"pit_pitches":182,"pit_strikes":88,"pit_per_ip":24.8,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":39,"pit_rank":13,"gpt_rank":39,"ovr_rank":29},{"id":4,"name":"Wright W","team":"Marauders","team_key":"MARAUDERS","AB":18,"H":5,"BB":7,"HBP":2,"SO":7,"R":7,"SB":13,"TB":6,"PA":27,"2B":1,"3B":0,"HR":0,"AVG":0.278,"SLG":0.333,"OBP":0.519,"OPS":0.852,"score":28.35,"gpt_hit_score":28.35,"gpt_pit_score":40.7,"ovr_score":32.05,"outs":15,"IP":"5.0","ip_val":5.0,"ERA":12.0,"K6":14.4,"BB6":14.4,"H6":6.0,"WHIP":3.4,"STR_PCT":43.8,"pit_SO":12,"pit_BB":12,"pit_BF":0,"pit_H":5,"pit_ER":10,"pit_pitches":162,"pit_strikes":71,"pit_per_ip":32.4,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":52,"pit_rank":26,"gpt_rank":52,"ovr_rank":43},{"id":5,"name":"Remy H","team":"Marauders","team_key":"MARAUDERS","AB":19,"H":5,"BB":5,"HBP":0,"SO":6,"R":7,"SB":0,"TB":6,"PA":24,"2B":1,"3B":0,"HR":0,"AVG":0.263,"SLG":0.316,"OBP":0.417,"OPS":0.733,"score":19.75,"gpt_hit_score":19.75,"gpt_pit_score":14.0,"ovr_score":18.02,"outs":3,"IP":"1.0","ip_val":1.0,"ERA":18.0,"K6":12.0,"BB6":24.0,"H6":18.0,"WHIP":7.0,"STR_PCT":null,"pit_SO":2,"pit_BB":4,"pit_BF":0,"pit_H":3,"pit_ER":3,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":66,"pit_rank":63,"gpt_rank":66,"ovr_rank":70},{"id":6,"name":"Andrew F","team":"Marauders","team_key":"MARAUDERS","AB":21,"H":14,"BB":6,"HBP":2,"SO":2,"R":14,"SB":18,"TB":17,"PA":29,"2B":0,"3B":0,"HR":1,"AVG":0.667,"SLG":0.81,"OBP":0.759,"OPS":1.569,"score":61.12,"gpt_hit_score":61.12,"gpt_pit_score":null,"ovr_score":58.06,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":2,"pit_BF":0,"pit_H":0,"pit_ER":0,"pit_pitches":9,"pit_strikes":1,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":6,"pit_rank":null,"gpt_rank":6,"ovr_rank":6},{"id":7,"name":"Reece F","team":"Marauders","team_key":"MARAUDERS","AB":12,"H":2,"BB":8,"HBP":2,"SO":9,"R":9,"SB":7,"TB":2,"PA":22,"2B":0,"3B":0,"HR":0,"AVG":0.167,"SLG":0.167,"OBP":0.545,"OPS":0.712,"score":17.34,"gpt_hit_score":17.34,"gpt_pit_score":null,"ovr_score":16.47,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":4,"pit_BF":0,"pit_H":0,"pit_ER":4,"pit_pitches":17,"pit_strikes":1,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":71,"pit_rank":null,"gpt_rank":71,"ovr_rank":76},{"id":8,"name":"Graeme B","team":"Marauders","team_key":"MARAUDERS","AB":9,"H":1,"BB":14,"HBP":1,"SO":8,"R":7,"SB":8,"TB":1,"PA":24,"2B":0,"3B":0,"HR":0,"AVG":0.111,"SLG":0.111,"OBP":0.667,"OPS":0.778,"score":21.86,"gpt_hit_score":21.86,"gpt_pit_score":null,"ovr_score":20.77,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":0,"pit_BF":0,"pit_H":0,"pit_ER":0,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":60,"pit_rank":null,"gpt_rank":60,"ovr_rank":65},{"id":9,"name":"Greyson C","team":"Marauders","team_key":"MARAUDERS","AB":13,"H":6,"BB":5,"HBP":0,"SO":5,"R":5,"SB":4,"TB":6,"PA":18,"2B":0,"3B":0,"HR":0,"AVG":0.462,"SLG":0.462,"OBP":0.611,"OPS":1.073,"score":32.93,"gpt_hit_score":32.93,"gpt_pit_score":null,"ovr_score":31.28,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":1,"pit_BF":0,"pit_H":2,"pit_ER":0,"pit_pitches":12,"pit_strikes":3,"pit_per_ip":null,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":42,"pit_rank":null,"gpt_rank":42,"ovr_rank":45},{"id":0,"name":"Taylor H","team":"Mussels","team_key":"MUSSELS","AB":10,"H":5,"BB":3,"HBP":1,"SO":1,"R":3,"SB":2,"TB":6,"PA":14,"2B":1,"3B":0,"HR":0,"AVG":0.5,"SLG":0.6,"OBP":0.643,"OPS":1.243,"score":39.56,"gpt_hit_score":39.56,"gpt_pit_score":27.7,"ovr_score":36.0,"outs":9,"IP":"3.0","ip_val":3.0,"ERA":28.0,"K6":18.0,"BB6":42.0,"H6":10.0,"WHIP":8.67,"STR_PCT":38.8,"pit_SO":9,"pit_BB":21,"pit_BF":0,"pit_H":5,"pit_ER":14,"pit_pitches":80,"pit_strikes":31,"pit_per_ip":26.7,"pit_HBP":0,"G":6,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":32,"pit_rank":40,"gpt_rank":32,"ovr_rank":37},{"id":1,"name":"Carson D","team":"Mussels","team_key":"MUSSELS","AB":14,"H":7,"BB":10,"HBP":2,"SO":6,"R":7,"SB":11,"TB":10,"PA":26,"2B":1,"3B":1,"HR":0,"AVG":0.5,"SLG":0.714,"OBP":0.731,"OPS":1.445,"score":49.89,"gpt_hit_score":49.89,"gpt_pit_score":27.3,"ovr_score":43.11,"outs":10,"IP":"3.1","ip_val":3.3333,"ERA":19.8,"K6":7.2,"BB6":14.4,"H6":16.2,"WHIP":5.1,"STR_PCT":48.3,"pit_SO":4,"pit_BB":8,"pit_BF":0,"pit_H":9,"pit_ER":11,"pit_pitches":118,"pit_strikes":57,"pit_per_ip":35.4,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":20,"pit_rank":43,"gpt_rank":20,"ovr_rank":27},{"id":2,"name":"Clyde H","team":"Mussels","team_key":"MUSSELS","AB":14,"H":10,"BB":6,"HBP":3,"SO":2,"R":13,"SB":13,"TB":12,"PA":23,"2B":2,"3B":0,"HR":0,"AVG":0.714,"SLG":0.857,"OBP":0.826,"OPS":1.683,"score":62.02,"gpt_hit_score":62.02,"gpt_pit_score":67.8,"ovr_score":63.75,"outs":16,"IP":"5.1","ip_val":5.3333,"ERA":7.88,"K6":9.0,"BB6":3.4,"H6":10.1,"WHIP":2.25,"STR_PCT":66.3,"pit_SO":8,"pit_BB":3,"pit_BF":0,"pit_H":9,"pit_ER":7,"pit_pitches":95,"pit_strikes":63,"pit_per_ip":17.8,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":2,"pit_rank":3,"gpt_rank":2,"ovr_rank":1},{"id":3,"name":"Alex D","team":"Mussels","team_key":"MUSSELS","AB":15,"H":2,"BB":4,"HBP":5,"SO":8,"R":4,"SB":5,"TB":3,"PA":24,"2B":1,"3B":0,"HR":0,"AVG":0.133,"SLG":0.2,"OBP":0.458,"OPS":0.658,"score":13.96,"gpt_hit_score":13.96,"gpt_pit_score":26.6,"ovr_score":17.75,"outs":12,"IP":"4.0","ip_val":4.0,"ERA":12.0,"K6":9.0,"BB6":18.0,"H6":6.0,"WHIP":4.0,"STR_PCT":38.7,"pit_SO":6,"pit_BB":12,"pit_BF":0,"pit_H":4,"pit_ER":8,"pit_pitches":119,"pit_strikes":46,"pit_per_ip":29.8,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":75,"pit_rank":47,"gpt_rank":75,"ovr_rank":71},{"id":4,"name":"Sloan R","team":"Mussels","team_key":"MUSSELS","AB":20,"H":8,"BB":5,"HBP":2,"SO":4,"R":4,"SB":5,"TB":9,"PA":27,"2B":1,"3B":0,"HR":0,"AVG":0.4,"SLG":0.45,"OBP":0.556,"OPS":1.006,"score":33.49,"gpt_hit_score":33.49,"gpt_pit_score":48.8,"ovr_score":38.08,"outs":9,"IP":"3.0","ip_val":3.0,"ERA":18.0,"K6":18.0,"BB6":28.0,"H6":0.0,"WHIP":4.67,"STR_PCT":46.8,"pit_SO":9,"pit_BB":14,"pit_BF":0,"pit_H":0,"pit_ER":9,"pit_pitches":111,"pit_strikes":52,"pit_per_ip":37.0,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":41,"pit_rank":18,"gpt_rank":41,"ovr_rank":34},{"id":5,"name":"Eli C","team":"Mussels","team_key":"MUSSELS","AB":7,"H":0,"BB":8,"HBP":3,"SO":5,"R":4,"SB":4,"TB":0,"PA":18,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.611,"OPS":0.611,"score":12.75,"gpt_hit_score":12.75,"gpt_pit_score":5.6,"ovr_score":10.6,"outs":5,"IP":"1.2","ip_val":1.6667,"ERA":25.2,"K6":3.6,"BB6":21.6,"H6":10.8,"WHIP":5.4,"STR_PCT":null,"pit_SO":1,"pit_BB":6,"pit_BF":0,"pit_H":3,"pit_ER":7,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":80,"pit_rank":76,"gpt_rank":80,"ovr_rank":86},{"id":6,"name":"Wesley P","team":"Mussels","team_key":"MUSSELS","AB":9,"H":2,"BB":7,"HBP":0,"SO":4,"R":2,"SB":0,"TB":2,"PA":16,"2B":0,"3B":0,"HR":0,"AVG":0.222,"SLG":0.222,"OBP":0.562,"OPS":0.784,"score":20.76,"gpt_hit_score":20.76,"gpt_pit_score":27.4,"ovr_score":22.75,"outs":6,"IP":"2.0","ip_val":2.0,"ERA":18.0,"K6":15.0,"BB6":18.0,"H6":18.0,"WHIP":6.0,"STR_PCT":41.1,"pit_SO":5,"pit_BB":6,"pit_BF":0,"pit_H":6,"pit_ER":6,"pit_pitches":56,"pit_strikes":23,"pit_per_ip":null,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":63,"pit_rank":42,"gpt_rank":63,"ovr_rank":62},{"id":7,"name":"Dex D","team":"Mussels","team_key":"MUSSELS","AB":7,"H":3,"BB":16,"HBP":1,"SO":4,"R":9,"SB":14,"TB":3,"PA":24,"2B":0,"3B":0,"HR":0,"AVG":0.429,"SLG":0.429,"OBP":0.833,"OPS":1.262,"score":48.28,"gpt_hit_score":48.28,"gpt_pit_score":40.2,"ovr_score":45.86,"outs":7,"IP":"2.1","ip_val":2.3333,"ERA":15.43,"K6":5.1,"BB6":2.6,"H6":18.0,"WHIP":3.43,"STR_PCT":54.5,"pit_SO":2,"pit_BB":1,"pit_BF":0,"pit_H":7,"pit_ER":6,"pit_pitches":22,"pit_strikes":12,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":21,"pit_rank":28,"gpt_rank":21,"ovr_rank":18},{"id":8,"name":"Austin K","team":"Mussels","team_key":"MUSSELS","AB":13,"H":0,"BB":7,"HBP":0,"SO":11,"R":6,"SB":1,"TB":0,"PA":20,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.35,"OPS":0.35,"score":-0.28,"gpt_hit_score":-0.28,"gpt_pit_score":null,"ovr_score":-0.27,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":0,"pit_BF":0,"pit_H":0,"pit_ER":0,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":92,"pit_rank":null,"gpt_rank":92,"ovr_rank":93},{"id":9,"name":"Oliver P","team":"Mussels","team_key":"MUSSELS","AB":13,"H":3,"BB":9,"HBP":1,"SO":9,"R":5,"SB":8,"TB":3,"PA":23,"2B":0,"3B":0,"HR":0,"AVG":0.231,"SLG":0.231,"OBP":0.565,"OPS":0.796,"score":22.12,"gpt_hit_score":22.12,"gpt_pit_score":21.9,"ovr_score":22.05,"outs":4,"IP":"1.1","ip_val":1.3333,"ERA":31.5,"K6":13.5,"BB6":45.0,"H6":13.5,"WHIP":9.75,"STR_PCT":38.2,"pit_SO":3,"pit_BB":10,"pit_BF":0,"pit_H":3,"pit_ER":7,"pit_pitches":102,"pit_strikes":39,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":59,"pit_rank":52,"gpt_rank":59,"ovr_rank":63},{"id":0,"name":"Jack C","team":"Tide","team_key":"TIDE","AB":17,"H":9,"BB":14,"HBP":1,"SO":6,"R":21,"SB":12,"TB":16,"PA":32,"2B":2,"3B":1,"HR":1,"AVG":0.529,"SLG":0.941,"OBP":0.75,"OPS":1.691,"score":61.2,"gpt_hit_score":61.2,"gpt_pit_score":30.4,"ovr_score":51.96,"outs":8,"IP":"2.2","ip_val":2.6667,"ERA":9.0,"K6":13.5,"BB6":24.8,"H6":6.8,"WHIP":5.25,"STR_PCT":37.8,"pit_SO":6,"pit_BB":11,"pit_BF":0,"pit_H":3,"pit_ER":4,"pit_pitches":90,"pit_strikes":34,"pit_per_ip":null,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":4,"pit_rank":35,"gpt_rank":4,"ovr_rank":12},{"id":1,"name":"Logan J","team":"Tide","team_key":"TIDE","AB":24,"H":17,"BB":6,"HBP":2,"SO":3,"R":16,"SB":5,"TB":22,"PA":32,"2B":1,"3B":2,"HR":0,"AVG":0.708,"SLG":0.917,"OBP":0.781,"OPS":1.698,"score":61.13,"gpt_hit_score":61.13,"gpt_pit_score":29.5,"ovr_score":51.64,"outs":11,"IP":"3.2","ip_val":3.6667,"ERA":14.73,"K6":13.1,"BB6":22.9,"H6":6.5,"WHIP":4.91,"STR_PCT":38.4,"pit_SO":8,"pit_BB":14,"pit_BF":0,"pit_H":4,"pit_ER":9,"pit_pitches":112,"pit_strikes":43,"pit_per_ip":30.5,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":5,"pit_rank":37,"gpt_rank":5,"ovr_rank":13},{"id":2,"name":"Luke B","team":"Tide","team_key":"TIDE","AB":19,"H":13,"BB":7,"HBP":1,"SO":5,"R":10,"SB":0,"TB":21,"PA":27,"2B":3,"3B":1,"HR":1,"AVG":0.684,"SLG":1.105,"OBP":0.778,"OPS":1.883,"score":61.51,"gpt_hit_score":61.51,"gpt_pit_score":58.9,"ovr_score":60.73,"outs":27,"IP":"9.0","ip_val":9.0,"ERA":8.67,"K6":11.3,"BB6":4.0,"H6":11.3,"WHIP":2.56,"STR_PCT":55.0,"pit_SO":17,"pit_BB":6,"pit_BF":0,"pit_H":17,"pit_ER":13,"pit_pitches":180,"pit_strikes":99,"pit_per_ip":20.0,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":3,"pit_rank":8,"gpt_rank":3,"ovr_rank":2},{"id":3,"name":"William G","team":"Tide","team_key":"TIDE","AB":20,"H":4,"BB":7,"HBP":2,"SO":6,"R":5,"SB":1,"TB":4,"PA":29,"2B":0,"3B":0,"HR":0,"AVG":0.2,"SLG":0.2,"OBP":0.448,"OPS":0.648,"score":17.92,"gpt_hit_score":17.92,"gpt_pit_score":46.5,"ovr_score":26.49,"outs":20,"IP":"6.2","ip_val":6.6667,"ERA":7.2,"K6":9.9,"BB6":7.2,"H6":9.9,"WHIP":2.85,"STR_PCT":50.0,"pit_SO":11,"pit_BB":8,"pit_BF":0,"pit_H":11,"pit_ER":8,"pit_pitches":42,"pit_strikes":21,"pit_per_ip":6.3,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":70,"pit_rank":21,"gpt_rank":70,"ovr_rank":55},{"id":4,"name":"Spencer H","team":"Tide","team_key":"TIDE","AB":17,"H":5,"BB":10,"HBP":3,"SO":5,"R":8,"SB":6,"TB":5,"PA":30,"2B":0,"3B":0,"HR":0,"AVG":0.294,"SLG":0.294,"OBP":0.6,"OPS":0.894,"score":29.82,"gpt_hit_score":29.82,"gpt_pit_score":28.1,"ovr_score":29.3,"outs":11,"IP":"3.2","ip_val":3.6667,"ERA":8.18,"K6":8.2,"BB6":11.5,"H6":9.8,"WHIP":3.55,"STR_PCT":43.0,"pit_SO":5,"pit_BB":7,"pit_BF":0,"pit_H":6,"pit_ER":5,"pit_pitches":93,"pit_strikes":40,"pit_per_ip":25.4,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":49,"pit_rank":39,"gpt_rank":49,"ovr_rank":47},{"id":5,"name":"Asher T","team":"Tide","team_key":"TIDE","AB":14,"H":7,"BB":8,"HBP":0,"SO":2,"R":8,"SB":6,"TB":7,"PA":22,"2B":0,"3B":0,"HR":0,"AVG":0.5,"SLG":0.5,"OBP":0.682,"OPS":1.182,"score":42.75,"gpt_hit_score":42.75,"gpt_pit_score":27.0,"ovr_score":38.02,"outs":13,"IP":"4.1","ip_val":4.3333,"ERA":11.08,"K6":9.7,"BB6":19.4,"H6":8.3,"WHIP":4.62,"STR_PCT":40.0,"pit_SO":7,"pit_BB":14,"pit_BF":0,"pit_H":6,"pit_ER":8,"pit_pitches":145,"pit_strikes":58,"pit_per_ip":33.5,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":28,"pit_rank":46,"gpt_rank":28,"ovr_rank":35},{"id":6,"name":"Charles W","team":"Tide","team_key":"TIDE","AB":13,"H":7,"BB":11,"HBP":2,"SO":6,"R":8,"SB":7,"TB":10,"PA":26,"2B":3,"3B":0,"HR":0,"AVG":0.538,"SLG":0.769,"OBP":0.769,"OPS":1.538,"score":52.0,"gpt_hit_score":52.0,"gpt_pit_score":10.1,"ovr_score":39.43,"outs":5,"IP":"1.2","ip_val":1.6667,"ERA":39.6,"K6":7.2,"BB6":46.8,"H6":18.0,"WHIP":10.8,"STR_PCT":34.3,"pit_SO":2,"pit_BB":13,"pit_BF":0,"pit_H":5,"pit_ER":11,"pit_pitches":102,"pit_strikes":35,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":17,"pit_rank":71,"gpt_rank":17,"ovr_rank":32},{"id":7,"name":"Harrison B","team":"Tide","team_key":"TIDE","AB":13,"H":4,"BB":9,"HBP":2,"SO":8,"R":9,"SB":0,"TB":7,"PA":24,"2B":1,"3B":1,"HR":0,"AVG":0.308,"SLG":0.538,"OBP":0.625,"OPS":1.163,"score":31.4,"gpt_hit_score":31.4,"gpt_pit_score":15.5,"ovr_score":26.63,"outs":4,"IP":"1.1","ip_val":1.3333,"ERA":22.5,"K6":9.0,"BB6":31.5,"H6":9.0,"WHIP":6.75,"STR_PCT":34.4,"pit_SO":2,"pit_BB":7,"pit_BF":0,"pit_H":2,"pit_ER":5,"pit_pitches":32,"pit_strikes":11,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":46,"pit_rank":62,"gpt_rank":46,"ovr_rank":52},{"id":8,"name":"Sam W","team":"Tide","team_key":"TIDE","AB":11,"H":0,"BB":13,"HBP":3,"SO":9,"R":10,"SB":6,"TB":0,"PA":27,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.593,"OPS":0.593,"score":12.58,"gpt_hit_score":12.58,"gpt_pit_score":null,"ovr_score":11.95,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":5,"pit_BF":0,"pit_H":1,"pit_ER":3,"pit_pitches":27,"pit_strikes":6,"pit_per_ip":null,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":81,"pit_rank":null,"gpt_rank":81,"ovr_rank":83},{"id":9,"name":"Finn W","team":"Tide","team_key":"TIDE","AB":19,"H":4,"BB":4,"HBP":0,"SO":7,"R":7,"SB":2,"TB":4,"PA":23,"2B":0,"3B":0,"HR":0,"AVG":0.211,"SLG":0.211,"OBP":0.348,"OPS":0.559,"score":13.47,"gpt_hit_score":13.47,"gpt_pit_score":25.7,"ovr_score":17.14,"outs":9,"IP":"3.0","ip_val":3.0,"ERA":8.0,"K6":14.0,"BB6":6.0,"H6":12.0,"WHIP":3.0,"STR_PCT":null,"pit_SO":7,"pit_BB":3,"pit_BF":0,"pit_H":6,"pit_ER":4,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":0.0,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":77,"pit_rank":49,"gpt_rank":77,"ovr_rank":74},{"id":0,"name":"Ethan S","team":"Hooks","team_key":"HOOKS","AB":17,"H":8,"BB":8,"HBP":0,"SO":2,"R":9,"SB":2,"TB":11,"PA":25,"2B":1,"3B":1,"HR":0,"AVG":0.471,"SLG":0.647,"OBP":0.64,"OPS":1.287,"score":44.21,"gpt_hit_score":44.21,"gpt_pit_score":44.5,"ovr_score":44.3,"outs":11,"IP":"3.2","ip_val":3.6667,"ERA":8.18,"K6":13.1,"BB6":13.1,"H6":0.0,"WHIP":2.18,"STR_PCT":42.3,"pit_SO":8,"pit_BB":8,"pit_BF":0,"pit_H":0,"pit_ER":5,"pit_pitches":52,"pit_strikes":22,"pit_per_ip":14.2,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":26,"pit_rank":22,"gpt_rank":26,"ovr_rank":23},{"id":1,"name":"Jonathan G","team":"Hooks","team_key":"HOOKS","AB":21,"H":11,"BB":11,"HBP":1,"SO":1,"R":14,"SB":11,"TB":13,"PA":33,"2B":2,"3B":0,"HR":0,"AVG":0.524,"SLG":0.619,"OBP":0.697,"OPS":1.316,"score":52.16,"gpt_hit_score":52.16,"gpt_pit_score":27.1,"ovr_score":44.64,"outs":10,"IP":"3.1","ip_val":3.3333,"ERA":27.0,"K6":10.8,"BB6":16.2,"H6":19.8,"WHIP":6.0,"STR_PCT":44.4,"pit_SO":6,"pit_BB":9,"pit_BF":0,"pit_H":11,"pit_ER":15,"pit_pitches":72,"pit_strikes":32,"pit_per_ip":21.6,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":16,"pit_rank":44,"gpt_rank":16,"ovr_rank":20},{"id":2,"name":"Dylan W","team":"Hooks","team_key":"HOOKS","AB":22,"H":12,"BB":8,"HBP":3,"SO":5,"R":14,"SB":11,"TB":19,"PA":33,"2B":1,"3B":0,"HR":2,"AVG":0.545,"SLG":0.864,"OBP":0.697,"OPS":1.561,"score":55.99,"gpt_hit_score":55.99,"gpt_pit_score":66.7,"ovr_score":59.2,"outs":22,"IP":"7.1","ip_val":7.3333,"ERA":3.27,"K6":17.2,"BB6":7.4,"H6":2.5,"WHIP":1.64,"STR_PCT":51.2,"pit_SO":21,"pit_BB":9,"pit_BF":0,"pit_H":3,"pit_ER":4,"pit_pitches":127,"pit_strikes":65,"pit_per_ip":17.3,"pit_HBP":2,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":12,"pit_rank":5,"gpt_rank":12,"ovr_rank":5},{"id":3,"name":"Ethan M","team":"Hooks","team_key":"HOOKS","AB":13,"H":8,"BB":7,"HBP":1,"SO":0,"R":8,"SB":3,"TB":11,"PA":21,"2B":1,"3B":1,"HR":0,"AVG":0.615,"SLG":0.846,"OBP":0.762,"OPS":1.608,"score":56.32,"gpt_hit_score":56.32,"gpt_pit_score":68.7,"ovr_score":60.03,"outs":20,"IP":"6.2","ip_val":6.6667,"ERA":7.2,"K6":11.7,"BB6":7.2,"H6":2.7,"WHIP":1.65,"STR_PCT":58.2,"pit_SO":13,"pit_BB":8,"pit_BF":0,"pit_H":3,"pit_ER":8,"pit_pitches":98,"pit_strikes":57,"pit_per_ip":14.7,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":11,"pit_rank":2,"gpt_rank":11,"ovr_rank":4},{"id":4,"name":"David H","team":"Hooks","team_key":"HOOKS","AB":20,"H":7,"BB":7,"HBP":1,"SO":5,"R":5,"SB":2,"TB":9,"PA":28,"2B":0,"3B":1,"HR":0,"AVG":0.35,"SLG":0.45,"OBP":0.536,"OPS":0.986,"score":31.34,"gpt_hit_score":31.34,"gpt_pit_score":13.7,"ovr_score":26.05,"outs":2,"IP":"0.2","ip_val":0.6667,"ERA":36.0,"K6":9.0,"BB6":81.0,"H6":9.0,"WHIP":15.0,"STR_PCT":11.6,"pit_SO":1,"pit_BB":9,"pit_BF":0,"pit_H":1,"pit_ER":4,"pit_pitches":43,"pit_strikes":5,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":47,"pit_rank":64,"gpt_rank":47,"ovr_rank":58},{"id":5,"name":"Nash A","team":"Hooks","team_key":"HOOKS","AB":12,"H":3,"BB":13,"HBP":1,"SO":7,"R":8,"SB":1,"TB":3,"PA":26,"2B":0,"3B":0,"HR":0,"AVG":0.25,"SLG":0.25,"OBP":0.654,"OPS":0.904,"score":26.24,"gpt_hit_score":26.24,"gpt_pit_score":18.5,"ovr_score":23.92,"outs":7,"IP":"2.1","ip_val":2.3333,"ERA":10.29,"K6":7.7,"BB6":20.6,"H6":7.7,"WHIP":4.71,"STR_PCT":35.1,"pit_SO":3,"pit_BB":8,"pit_BF":0,"pit_H":3,"pit_ER":4,"pit_pitches":57,"pit_strikes":20,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":54,"pit_rank":56,"gpt_rank":54,"ovr_rank":60},{"id":6,"name":"Jackson N","team":"Hooks","team_key":"HOOKS","AB":21,"H":4,"BB":5,"HBP":0,"SO":9,"R":5,"SB":3,"TB":4,"PA":26,"2B":0,"3B":0,"HR":0,"AVG":0.19,"SLG":0.19,"OBP":0.346,"OPS":0.536,"score":12.28,"gpt_hit_score":12.28,"gpt_pit_score":0.0,"ovr_score":8.6,"outs":2,"IP":"0.2","ip_val":0.6667,"ERA":99.0,"K6":0.0,"BB6":81.0,"H6":36.0,"WHIP":19.5,"STR_PCT":25.0,"pit_SO":0,"pit_BB":9,"pit_BF":0,"pit_H":4,"pit_ER":11,"pit_pitches":56,"pit_strikes":14,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":83,"pit_rank":78,"gpt_rank":83,"ovr_rank":88},{"id":7,"name":"Bennett V","team":"Hooks","team_key":"HOOKS","AB":14,"H":7,"BB":13,"HBP":2,"SO":5,"R":5,"SB":8,"TB":7,"PA":29,"2B":0,"3B":0,"HR":0,"AVG":0.5,"SLG":0.5,"OBP":0.759,"OPS":1.259,"score":45.71,"gpt_hit_score":45.71,"gpt_pit_score":10.2,"ovr_score":35.06,"outs":9,"IP":"3.0","ip_val":3.0,"ERA":22.0,"K6":8.0,"BB6":28.0,"H6":12.0,"WHIP":6.67,"STR_PCT":33.3,"pit_SO":4,"pit_BB":14,"pit_BF":0,"pit_H":6,"pit_ER":11,"pit_pitches":87,"pit_strikes":29,"pit_per_ip":29.0,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":23,"pit_rank":70,"gpt_rank":23,"ovr_rank":38},{"id":8,"name":"William D","team":"Hooks","team_key":"HOOKS","AB":11,"H":0,"BB":4,"HBP":0,"SO":9,"R":4,"SB":0,"TB":0,"PA":15,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.267,"OPS":0.267,"score":-4.26,"gpt_hit_score":-4.26,"gpt_pit_score":null,"ovr_score":-4.05,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":7,"pit_BF":0,"pit_H":5,"pit_ER":8,"pit_pitches":46,"pit_strikes":13,"pit_per_ip":null,"pit_HBP":0,"G":6,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":93,"pit_rank":null,"gpt_rank":93,"ovr_rank":94},{"id":9,"name":"Remington B","team":"Hooks","team_key":"HOOKS","AB":13,"H":1,"BB":11,"HBP":1,"SO":8,"R":6,"SB":3,"TB":1,"PA":25,"2B":0,"3B":0,"HR":0,"AVG":0.077,"SLG":0.077,"OBP":0.52,"OPS":0.597,"score":13.7,"gpt_hit_score":13.7,"gpt_pit_score":27.1,"ovr_score":17.72,"outs":3,"IP":"1.0","ip_val":1.0,"ERA":12.0,"K6":18.0,"BB6":30.0,"H6":12.0,"WHIP":7.0,"STR_PCT":40.5,"pit_SO":3,"pit_BB":5,"pit_BF":0,"pit_H":2,"pit_ER":2,"pit_pitches":42,"pit_strikes":17,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":76,"pit_rank":45,"gpt_rank":76,"ovr_rank":72},{"id":0,"name":"Remy W","team":"River Dogs","team_key":"RIVER_DOGS","AB":19,"H":9,"BB":8,"HBP":1,"SO":0,"R":16,"SB":5,"TB":15,"PA":28,"2B":0,"3B":3,"HR":0,"AVG":0.474,"SLG":0.789,"OBP":0.643,"OPS":1.432,"score":51.79,"gpt_hit_score":51.79,"gpt_pit_score":52.6,"ovr_score":52.03,"outs":21,"IP":"7.0","ip_val":7.0,"ERA":9.43,"K6":11.1,"BB6":7.7,"H6":9.4,"WHIP":2.86,"STR_PCT":53.8,"pit_SO":13,"pit_BB":9,"pit_BF":0,"pit_H":11,"pit_ER":11,"pit_pitches":93,"pit_strikes":50,"pit_per_ip":13.3,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":18,"pit_rank":14,"gpt_rank":18,"ovr_rank":11},{"id":1,"name":"Hudson M","team":"River Dogs","team_key":"RIVER_DOGS","AB":21,"H":13,"BB":10,"HBP":2,"SO":2,"R":19,"SB":2,"TB":18,"PA":33,"2B":2,"3B":0,"HR":1,"AVG":0.619,"SLG":0.857,"OBP":0.758,"OPS":1.615,"score":58.71,"gpt_hit_score":58.71,"gpt_pit_score":47.1,"ovr_score":55.23,"outs":14,"IP":"4.2","ip_val":4.6667,"ERA":7.71,"K6":15.4,"BB6":15.4,"H6":6.4,"WHIP":3.64,"STR_PCT":47.6,"pit_SO":12,"pit_BB":12,"pit_BF":0,"pit_H":5,"pit_ER":6,"pit_pitches":147,"pit_strikes":70,"pit_per_ip":31.5,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":9,"pit_rank":20,"gpt_rank":9,"ovr_rank":9},{"id":2,"name":"Elliott S","team":"River Dogs","team_key":"RIVER_DOGS","AB":18,"H":9,"BB":5,"HBP":3,"SO":1,"R":15,"SB":0,"TB":14,"PA":26,"2B":1,"3B":2,"HR":0,"AVG":0.5,"SLG":0.778,"OBP":0.654,"OPS":1.432,"score":47.47,"gpt_hit_score":47.47,"gpt_pit_score":37.7,"ovr_score":44.54,"outs":14,"IP":"4.2","ip_val":4.6667,"ERA":7.71,"K6":12.9,"BB6":23.1,"H6":2.6,"WHIP":4.29,"STR_PCT":38.5,"pit_SO":10,"pit_BB":18,"pit_BF":0,"pit_H":2,"pit_ER":6,"pit_pitches":122,"pit_strikes":47,"pit_per_ip":26.1,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":22,"pit_rank":31,"gpt_rank":22,"ovr_rank":21},{"id":3,"name":"William A","team":"River Dogs","team_key":"RIVER_DOGS","AB":18,"H":8,"BB":9,"HBP":0,"SO":4,"R":12,"SB":1,"TB":10,"PA":27,"2B":2,"3B":0,"HR":0,"AVG":0.444,"SLG":0.556,"OBP":0.63,"OPS":1.186,"score":39.58,"gpt_hit_score":39.58,"gpt_pit_score":42.8,"ovr_score":40.55,"outs":22,"IP":"7.1","ip_val":7.3333,"ERA":9.0,"K6":13.1,"BB6":16.4,"H6":2.5,"WHIP":3.14,"STR_PCT":40.6,"pit_SO":16,"pit_BB":20,"pit_BF":0,"pit_H":3,"pit_ER":11,"pit_pitches":212,"pit_strikes":86,"pit_per_ip":28.9,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":31,"pit_rank":23,"gpt_rank":31,"ovr_rank":30},{"id":4,"name":"Spencer L","team":"River Dogs","team_key":"RIVER_DOGS","AB":17,"H":1,"BB":8,"HBP":2,"SO":2,"R":5,"SB":0,"TB":1,"PA":27,"2B":0,"3B":0,"HR":0,"AVG":0.059,"SLG":0.059,"OBP":0.407,"OPS":0.466,"score":13.04,"gpt_hit_score":13.04,"gpt_pit_score":11.8,"ovr_score":12.67,"outs":16,"IP":"5.1","ip_val":5.3333,"ERA":19.12,"K6":9.0,"BB6":19.1,"H6":13.5,"WHIP":5.44,"STR_PCT":null,"pit_SO":8,"pit_BB":17,"pit_BF":0,"pit_H":12,"pit_ER":17,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":0.0,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":79,"pit_rank":68,"gpt_rank":79,"ovr_rank":81},{"id":5,"name":"Nolan Y","team":"River Dogs","team_key":"RIVER_DOGS","AB":23,"H":6,"BB":0,"HBP":1,"SO":8,"R":3,"SB":3,"TB":6,"PA":24,"2B":0,"3B":0,"HR":0,"AVG":0.261,"SLG":0.261,"OBP":0.292,"OPS":0.553,"score":12.36,"gpt_hit_score":12.36,"gpt_pit_score":38.0,"ovr_score":20.05,"outs":7,"IP":"2.1","ip_val":2.3333,"ERA":7.71,"K6":12.9,"BB6":12.9,"H6":10.3,"WHIP":3.86,"STR_PCT":48.1,"pit_SO":5,"pit_BB":5,"pit_BF":0,"pit_H":4,"pit_ER":3,"pit_pitches":77,"pit_strikes":37,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":82,"pit_rank":30,"gpt_rank":82,"ovr_rank":66},{"id":6,"name":"Stokan H","team":"River Dogs","team_key":"RIVER_DOGS","AB":18,"H":6,"BB":3,"HBP":1,"SO":3,"R":6,"SB":0,"TB":7,"PA":22,"2B":1,"3B":0,"HR":0,"AVG":0.333,"SLG":0.389,"OBP":0.455,"OPS":0.844,"score":25.13,"gpt_hit_score":25.13,"gpt_pit_score":30.1,"ovr_score":26.62,"outs":1,"IP":"0.1","ip_val":0.3333,"ERA":18.0,"K6":18.0,"BB6":54.0,"H6":0.0,"WHIP":9.0,"STR_PCT":28.6,"pit_SO":1,"pit_BB":3,"pit_BF":0,"pit_H":0,"pit_ER":1,"pit_pitches":21,"pit_strikes":6,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":58,"pit_rank":36,"gpt_rank":58,"ovr_rank":53},{"id":7,"name":"Cooper D","team":"River Dogs","team_key":"RIVER_DOGS","AB":15,"H":4,"BB":10,"HBP":0,"SO":5,"R":5,"SB":1,"TB":4,"PA":25,"2B":0,"3B":0,"HR":0,"AVG":0.267,"SLG":0.267,"OBP":0.56,"OPS":0.827,"score":25.35,"gpt_hit_score":25.35,"gpt_pit_score":38.6,"ovr_score":29.33,"outs":11,"IP":"3.2","ip_val":3.6667,"ERA":8.18,"K6":8.2,"BB6":14.7,"H6":8.2,"WHIP":3.82,"STR_PCT":50.5,"pit_SO":5,"pit_BB":9,"pit_BF":0,"pit_H":5,"pit_ER":5,"pit_pitches":91,"pit_strikes":46,"pit_per_ip":24.8,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":57,"pit_rank":29,"gpt_rank":57,"ovr_rank":46},{"id":8,"name":"Charles B","team":"River Dogs","team_key":"RIVER_DOGS","AB":17,"H":3,"BB":5,"HBP":0,"SO":9,"R":6,"SB":1,"TB":5,"PA":22,"2B":0,"3B":1,"HR":0,"AVG":0.176,"SLG":0.294,"OBP":0.364,"OPS":0.658,"score":13.37,"gpt_hit_score":13.37,"gpt_pit_score":12.9,"ovr_score":13.23,"outs":1,"IP":"0.1","ip_val":0.3333,"ERA":36.0,"K6":0.0,"BB6":36.0,"H6":0.0,"WHIP":6.0,"STR_PCT":23.1,"pit_SO":0,"pit_BB":2,"pit_BF":0,"pit_H":0,"pit_ER":2,"pit_pitches":13,"pit_strikes":3,"pit_per_ip":null,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":78,"pit_rank":66,"gpt_rank":78,"ovr_rank":80},{"id":9,"name":"Jericho L","team":"River Dogs","team_key":"RIVER_DOGS","AB":11,"H":1,"BB":7,"HBP":3,"SO":4,"R":7,"SB":1,"TB":1,"PA":21,"2B":0,"3B":0,"HR":0,"AVG":0.091,"SLG":0.091,"OBP":0.524,"OPS":0.615,"score":14.62,"gpt_hit_score":14.62,"gpt_pit_score":null,"ovr_score":13.89,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":7,"pit_BF":0,"pit_H":0,"pit_ER":4,"pit_pitches":35,"pit_strikes":6,"pit_per_ip":null,"pit_HBP":0,"G":11,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":74,"pit_rank":null,"gpt_rank":74,"ovr_rank":78},{"id":10,"name":"William V","team":"River Dogs","team_key":"RIVER_DOGS","AB":11,"H":2,"BB":5,"HBP":1,"SO":7,"R":5,"SB":0,"TB":2,"PA":17,"2B":0,"3B":0,"HR":0,"AVG":0.182,"SLG":0.182,"OBP":0.471,"OPS":0.653,"score":12.13,"gpt_hit_score":12.13,"gpt_pit_score":null,"ovr_score":11.52,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":0,"pit_BF":0,"pit_H":0,"pit_ER":0,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":84,"pit_rank":null,"gpt_rank":84,"ovr_rank":84},{"id":0,"name":"Grayson E","team":"Red Wings","team_key":"RED_WINGS","AB":13,"H":2,"BB":11,"HBP":0,"SO":6,"R":7,"SB":0,"TB":2,"PA":24,"2B":0,"3B":0,"HR":0,"AVG":0.154,"SLG":0.154,"OBP":0.542,"OPS":0.696,"score":18.48,"gpt_hit_score":18.48,"gpt_pit_score":20.0,"ovr_score":18.94,"outs":11,"IP":"3.2","ip_val":3.6667,"ERA":11.45,"K6":8.2,"BB6":19.6,"H6":4.9,"WHIP":4.09,"STR_PCT":30.6,"pit_SO":5,"pit_BB":12,"pit_BF":0,"pit_H":3,"pit_ER":7,"pit_pitches":98,"pit_strikes":30,"pit_per_ip":26.7,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":68,"pit_rank":55,"gpt_rank":68,"ovr_rank":68},{"id":1,"name":"Tyler G","team":"Red Wings","team_key":"RED_WINGS","AB":5,"H":1,"BB":4,"HBP":1,"SO":3,"R":2,"SB":0,"TB":1,"PA":10,"2B":0,"3B":0,"HR":0,"AVG":0.2,"SLG":0.2,"OBP":0.6,"OPS":0.8,"score":17.95,"gpt_hit_score":17.95,"gpt_pit_score":0.0,"ovr_score":12.56,"outs":2,"IP":"0.2","ip_val":0.6667,"ERA":54.0,"K6":0.0,"BB6":117.0,"H6":18.0,"WHIP":22.5,"STR_PCT":24.7,"pit_SO":0,"pit_BB":13,"pit_BF":0,"pit_H":2,"pit_ER":6,"pit_pitches":85,"pit_strikes":21,"pit_per_ip":null,"pit_HBP":0,"G":7,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":69,"pit_rank":79,"gpt_rank":69,"ovr_rank":82},{"id":2,"name":"Mason M","team":"Red Wings","team_key":"RED_WINGS","AB":17,"H":4,"BB":6,"HBP":1,"SO":10,"R":6,"SB":2,"TB":5,"PA":24,"2B":1,"3B":0,"HR":0,"AVG":0.235,"SLG":0.294,"OBP":0.458,"OPS":0.752,"score":17.03,"gpt_hit_score":17.03,"gpt_pit_score":53.8,"ovr_score":28.06,"outs":20,"IP":"6.2","ip_val":6.6667,"ERA":2.7,"K6":9.0,"BB6":6.3,"H6":5.4,"WHIP":1.95,"STR_PCT":50.0,"pit_SO":10,"pit_BB":7,"pit_BF":0,"pit_H":6,"pit_ER":3,"pit_pitches":134,"pit_strikes":67,"pit_per_ip":20.1,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":72,"pit_rank":11,"gpt_rank":72,"ovr_rank":48},{"id":3,"name":"Lawson D","team":"Red Wings","team_key":"RED_WINGS","AB":16,"H":10,"BB":7,"HBP":0,"SO":3,"R":10,"SB":6,"TB":11,"PA":23,"2B":1,"3B":0,"HR":0,"AVG":0.625,"SLG":0.688,"OBP":0.739,"OPS":1.427,"score":50.33,"gpt_hit_score":50.33,"gpt_pit_score":53.2,"ovr_score":51.19,"outs":20,"IP":"6.2","ip_val":6.6667,"ERA":4.5,"K6":10.8,"BB6":9.9,"H6":3.6,"WHIP":2.25,"STR_PCT":49.4,"pit_SO":12,"pit_BB":11,"pit_BF":0,"pit_H":4,"pit_ER":5,"pit_pitches":158,"pit_strikes":78,"pit_per_ip":23.7,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":19,"pit_rank":12,"gpt_rank":19,"ovr_rank":14},{"id":4,"name":"Reid S","team":"Red Wings","team_key":"RED_WINGS","AB":13,"H":4,"BB":9,"HBP":1,"SO":7,"R":9,"SB":2,"TB":4,"PA":23,"2B":0,"3B":0,"HR":0,"AVG":0.308,"SLG":0.308,"OBP":0.609,"OPS":0.917,"score":26.01,"gpt_hit_score":26.01,"gpt_pit_score":30.5,"ovr_score":27.36,"outs":5,"IP":"1.2","ip_val":1.6667,"ERA":43.2,"K6":14.4,"BB6":75.6,"H6":0.0,"WHIP":12.6,"STR_PCT":null,"pit_SO":4,"pit_BB":21,"pit_BF":0,"pit_H":0,"pit_ER":12,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":55,"pit_rank":34,"gpt_rank":55,"ovr_rank":51},{"id":5,"name":"Liam C","team":"Red Wings","team_key":"RED_WINGS","AB":16,"H":4,"BB":8,"HBP":3,"SO":9,"R":9,"SB":4,"TB":4,"PA":27,"2B":0,"3B":0,"HR":0,"AVG":0.25,"SLG":0.25,"OBP":0.556,"OPS":0.806,"score":21.37,"gpt_hit_score":21.37,"gpt_pit_score":8.9,"ovr_score":17.63,"outs":6,"IP":"2.0","ip_val":2.0,"ERA":24.0,"K6":6.0,"BB6":30.0,"H6":12.0,"WHIP":7.0,"STR_PCT":34.5,"pit_SO":2,"pit_BB":10,"pit_BF":0,"pit_H":4,"pit_ER":8,"pit_pitches":84,"pit_strikes":29,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":62,"pit_rank":73,"gpt_rank":62,"ovr_rank":73},{"id":6,"name":"Theodore R","team":"Red Wings","team_key":"RED_WINGS","AB":7,"H":0,"BB":10,"HBP":2,"SO":7,"R":5,"SB":2,"TB":0,"PA":19,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.632,"OPS":0.632,"score":11.29,"gpt_hit_score":11.29,"gpt_pit_score":9.2,"ovr_score":10.66,"outs":8,"IP":"2.2","ip_val":2.6667,"ERA":22.5,"K6":4.5,"BB6":33.8,"H6":13.5,"WHIP":7.88,"STR_PCT":36.1,"pit_SO":2,"pit_BB":15,"pit_BF":0,"pit_H":6,"pit_ER":10,"pit_pitches":119,"pit_strikes":43,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":86,"pit_rank":72,"gpt_rank":86,"ovr_rank":85},{"id":7,"name":"Hayes P","team":"Red Wings","team_key":"RED_WINGS","AB":9,"H":4,"BB":9,"HBP":2,"SO":4,"R":7,"SB":3,"TB":5,"PA":20,"2B":1,"3B":0,"HR":0,"AVG":0.444,"SLG":0.556,"OBP":0.75,"OPS":1.306,"score":41.39,"gpt_hit_score":41.39,"gpt_pit_score":47.2,"ovr_score":43.13,"outs":14,"IP":"4.2","ip_val":4.6667,"ERA":11.57,"K6":9.0,"BB6":14.1,"H6":7.7,"WHIP":3.64,"STR_PCT":56.4,"pit_SO":7,"pit_BB":11,"pit_BF":0,"pit_H":6,"pit_ER":9,"pit_pitches":39,"pit_strikes":22,"pit_per_ip":8.4,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":30,"pit_rank":19,"gpt_rank":30,"ovr_rank":26},{"id":8,"name":"Harper R","team":"Red Wings","team_key":"RED_WINGS","AB":9,"H":3,"BB":9,"HBP":3,"SO":3,"R":9,"SB":6,"TB":4,"PA":21,"2B":1,"3B":0,"HR":0,"AVG":0.333,"SLG":0.444,"OBP":0.714,"OPS":1.158,"score":37.79,"gpt_hit_score":37.79,"gpt_pit_score":17.1,"ovr_score":31.58,"outs":5,"IP":"1.2","ip_val":1.6667,"ERA":43.2,"K6":7.2,"BB6":32.4,"H6":28.8,"WHIP":10.2,"STR_PCT":40.4,"pit_SO":2,"pit_BB":9,"pit_BF":0,"pit_H":8,"pit_ER":12,"pit_pitches":99,"pit_strikes":40,"pit_per_ip":null,"pit_HBP":0,"G":10,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":35,"pit_rank":59,"gpt_rank":35,"ovr_rank":44},{"id":9,"name":"Connor H","team":"Red Wings","team_key":"RED_WINGS","AB":14,"H":2,"BB":4,"HBP":2,"SO":11,"R":2,"SB":2,"TB":2,"PA":20,"2B":0,"3B":0,"HR":0,"AVG":0.143,"SLG":0.143,"OBP":0.4,"OPS":0.543,"score":6.01,"gpt_hit_score":6.01,"gpt_pit_score":null,"ovr_score":5.71,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":0,"pit_BF":0,"pit_H":0,"pit_ER":0,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":88,"pit_rank":null,"gpt_rank":88,"ovr_rank":90},{"id":0,"name":"Wilton G","team":"Hot Rods","team_key":"HOT_RODS","AB":20,"H":8,"BB":5,"HBP":2,"SO":4,"R":10,"SB":2,"TB":13,"PA":27,"2B":0,"3B":1,"HR":1,"AVG":0.4,"SLG":0.65,"OBP":0.556,"OPS":1.206,"score":38.26,"gpt_hit_score":38.26,"gpt_pit_score":58.1,"ovr_score":44.21,"outs":16,"IP":"5.1","ip_val":5.3333,"ERA":10.12,"K6":13.5,"BB6":4.5,"H6":10.1,"WHIP":2.44,"STR_PCT":55.6,"pit_SO":12,"pit_BB":4,"pit_BF":0,"pit_H":9,"pit_ER":9,"pit_pitches":9,"pit_strikes":5,"pit_per_ip":1.7,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":34,"pit_rank":9,"gpt_rank":34,"ovr_rank":24},{"id":1,"name":"Anderson M","team":"Hot Rods","team_key":"HOT_RODS","AB":12,"H":2,"BB":12,"HBP":2,"SO":3,"R":5,"SB":5,"TB":2,"PA":26,"2B":0,"3B":0,"HR":0,"AVG":0.167,"SLG":0.167,"OBP":0.615,"OPS":0.782,"score":25.69,"gpt_hit_score":25.69,"gpt_pit_score":27.5,"ovr_score":26.23,"outs":11,"IP":"3.2","ip_val":3.6667,"ERA":11.45,"K6":6.5,"BB6":14.7,"H6":9.8,"WHIP":4.09,"STR_PCT":45.7,"pit_SO":4,"pit_BB":9,"pit_BF":0,"pit_H":6,"pit_ER":7,"pit_pitches":92,"pit_strikes":42,"pit_per_ip":25.1,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":56,"pit_rank":41,"gpt_rank":56,"ovr_rank":56},{"id":2,"name":"Beau M","team":"Hot Rods","team_key":"HOT_RODS","AB":13,"H":8,"BB":10,"HBP":1,"SO":4,"R":15,"SB":12,"TB":11,"PA":24,"2B":3,"3B":0,"HR":0,"AVG":0.615,"SLG":0.846,"OBP":0.792,"OPS":1.638,"score":59.25,"gpt_hit_score":59.25,"gpt_pit_score":50.0,"ovr_score":56.47,"outs":28,"IP":"9.1","ip_val":9.3333,"ERA":7.71,"K6":7.7,"BB6":5.1,"H6":10.3,"WHIP":2.57,"STR_PCT":51.6,"pit_SO":12,"pit_BB":8,"pit_BF":0,"pit_H":16,"pit_ER":12,"pit_pitches":182,"pit_strikes":94,"pit_per_ip":19.5,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":7,"pit_rank":15,"gpt_rank":7,"ovr_rank":7},{"id":3,"name":"Bennett A","team":"Hot Rods","team_key":"HOT_RODS","AB":13,"H":3,"BB":6,"HBP":2,"SO":6,"R":4,"SB":7,"TB":3,"PA":21,"2B":0,"3B":0,"HR":0,"AVG":0.231,"SLG":0.231,"OBP":0.524,"OPS":0.755,"score":21.72,"gpt_hit_score":21.72,"gpt_pit_score":25.4,"ovr_score":22.82,"outs":10,"IP":"3.1","ip_val":3.3333,"ERA":12.6,"K6":3.6,"BB6":12.6,"H6":10.8,"WHIP":3.9,"STR_PCT":48.5,"pit_SO":2,"pit_BB":7,"pit_BF":0,"pit_H":6,"pit_ER":7,"pit_pitches":97,"pit_strikes":47,"pit_per_ip":29.1,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":61,"pit_rank":50,"gpt_rank":61,"ovr_rank":61},{"id":4,"name":"Tensley L","team":"Hot Rods","team_key":"HOT_RODS","AB":11,"H":3,"BB":8,"HBP":1,"SO":1,"R":8,"SB":2,"TB":3,"PA":20,"2B":0,"3B":0,"HR":0,"AVG":0.273,"SLG":0.273,"OBP":0.6,"OPS":0.873,"score":29.22,"gpt_hit_score":29.22,"gpt_pit_score":17.6,"ovr_score":25.73,"outs":1,"IP":"0.1","ip_val":0.3333,"ERA":144.0,"K6":18.0,"BB6":108.0,"H6":90.0,"WHIP":33.0,"STR_PCT":33.3,"pit_SO":1,"pit_BB":6,"pit_BF":0,"pit_H":5,"pit_ER":8,"pit_pitches":45,"pit_strikes":15,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":50,"pit_rank":58,"gpt_rank":50,"ovr_rank":59},{"id":5,"name":"Jackson D","team":"Hot Rods","team_key":"HOT_RODS","AB":11,"H":3,"BB":4,"HBP":0,"SO":4,"R":5,"SB":6,"TB":5,"PA":15,"2B":2,"3B":0,"HR":0,"AVG":0.273,"SLG":0.455,"OBP":0.467,"OPS":0.922,"score":27.58,"gpt_hit_score":27.58,"gpt_pit_score":49.3,"ovr_score":34.1,"outs":4,"IP":"1.1","ip_val":1.3333,"ERA":0.0,"K6":9.0,"BB6":4.5,"H6":9.0,"WHIP":2.25,"STR_PCT":53.1,"pit_SO":2,"pit_BB":1,"pit_BF":0,"pit_H":2,"pit_ER":0,"pit_pitches":32,"pit_strikes":17,"pit_per_ip":null,"pit_HBP":0,"G":7,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":53,"pit_rank":17,"gpt_rank":53,"ovr_rank":39},{"id":6,"name":"Louis C","team":"Hot Rods","team_key":"HOT_RODS","AB":10,"H":5,"BB":9,"HBP":0,"SO":5,"R":6,"SB":3,"TB":7,"PA":19,"2B":0,"3B":1,"HR":0,"AVG":0.5,"SLG":0.7,"OBP":0.737,"OPS":1.437,"score":45.17,"gpt_hit_score":45.17,"gpt_pit_score":42.4,"ovr_score":44.34,"outs":3,"IP":"1.0","ip_val":1.0,"ERA":24.0,"K6":6.0,"BB6":6.0,"H6":24.0,"WHIP":5.0,"STR_PCT":59.5,"pit_SO":1,"pit_BB":1,"pit_BF":0,"pit_H":4,"pit_ER":4,"pit_pitches":42,"pit_strikes":25,"pit_per_ip":null,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":25,"pit_rank":24,"gpt_rank":25,"ovr_rank":22},{"id":7,"name":"Oliver J","team":"Hot Rods","team_key":"HOT_RODS","AB":4,"H":0,"BB":10,"HBP":0,"SO":1,"R":6,"SB":1,"TB":0,"PA":14,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.714,"OPS":0.714,"score":20.45,"gpt_hit_score":20.45,"gpt_pit_score":3.3,"ovr_score":15.3,"outs":2,"IP":"0.2","ip_val":0.6667,"ERA":54.0,"K6":0.0,"BB6":45.0,"H6":9.0,"WHIP":9.0,"STR_PCT":20.0,"pit_SO":0,"pit_BB":5,"pit_BF":0,"pit_H":1,"pit_ER":6,"pit_pitches":30,"pit_strikes":6,"pit_per_ip":null,"pit_HBP":0,"G":7,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":65,"pit_rank":77,"gpt_rank":65,"ovr_rank":77},{"id":8,"name":"Rowan H","team":"Hot Rods","team_key":"HOT_RODS","AB":13,"H":4,"BB":5,"HBP":0,"SO":8,"R":8,"SB":5,"TB":4,"PA":18,"2B":0,"3B":0,"HR":0,"AVG":0.308,"SLG":0.308,"OBP":0.5,"OPS":0.808,"score":20.64,"gpt_hit_score":20.64,"gpt_pit_score":null,"ovr_score":19.61,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":1,"pit_BF":0,"pit_H":0,"pit_ER":0,"pit_pitches":5,"pit_strikes":1,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":64,"pit_rank":null,"gpt_rank":64,"ovr_rank":67},{"id":9,"name":"Elliott S","team":"Hot Rods","team_key":"HOT_RODS","AB":11,"H":7,"BB":5,"HBP":2,"SO":2,"R":8,"SB":8,"TB":9,"PA":18,"2B":0,"3B":1,"HR":0,"AVG":0.636,"SLG":0.818,"OBP":0.778,"OPS":1.596,"score":54.89,"gpt_hit_score":54.89,"gpt_pit_score":42.0,"ovr_score":51.02,"outs":3,"IP":"1.0","ip_val":1.0,"ERA":6.0,"K6":6.0,"BB6":6.0,"H6":18.0,"WHIP":4.0,"STR_PCT":56.2,"pit_SO":1,"pit_BB":1,"pit_BF":0,"pit_H":3,"pit_ER":1,"pit_pitches":16,"pit_strikes":9,"pit_per_ip":null,"pit_HBP":0,"G":7,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":13,"pit_rank":25,"gpt_rank":13,"ovr_rank":15},{"id":10,"name":"Ivey K","team":"Hot Rods","team_key":"HOT_RODS","AB":14,"H":3,"BB":2,"HBP":1,"SO":11,"R":3,"SB":0,"TB":3,"PA":17,"2B":0,"3B":0,"HR":0,"AVG":0.214,"SLG":0.214,"OBP":0.353,"OPS":0.567,"score":4.41,"gpt_hit_score":4.41,"gpt_pit_score":10.4,"ovr_score":6.21,"outs":2,"IP":"0.2","ip_val":0.6667,"ERA":54.0,"K6":9.0,"BB6":54.0,"H6":27.0,"WHIP":13.5,"STR_PCT":null,"pit_SO":1,"pit_BB":6,"pit_BF":0,"pit_H":3,"pit_ER":6,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":90,"pit_rank":69,"gpt_rank":90,"ovr_rank":89},{"id":0,"name":"Steven N","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":15,"H":9,"BB":9,"HBP":4,"SO":1,"R":16,"SB":16,"TB":10,"PA":28,"2B":1,"3B":0,"HR":0,"AVG":0.6,"SLG":0.667,"OBP":0.786,"OPS":1.453,"score":57.37,"gpt_hit_score":57.37,"gpt_pit_score":40.4,"ovr_score":52.28,"outs":16,"IP":"5.1","ip_val":5.3333,"ERA":14.62,"K6":11.2,"BB6":15.8,"H6":5.6,"WHIP":3.56,"STR_PCT":47.1,"pit_SO":10,"pit_BB":14,"pit_BF":0,"pit_H":5,"pit_ER":13,"pit_pitches":119,"pit_strikes":56,"pit_per_ip":22.3,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":10,"pit_rank":27,"gpt_rank":10,"ovr_rank":10},{"id":1,"name":"William K","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":14,"H":5,"BB":5,"HBP":1,"SO":4,"R":9,"SB":14,"TB":7,"PA":20,"2B":0,"3B":1,"HR":0,"AVG":0.357,"SLG":0.5,"OBP":0.55,"OPS":1.05,"score":37.19,"gpt_hit_score":37.19,"gpt_pit_score":62.8,"ovr_score":44.87,"outs":23,"IP":"7.2","ip_val":7.6667,"ERA":3.91,"K6":7.8,"BB6":4.7,"H6":7.0,"WHIP":1.96,"STR_PCT":57.7,"pit_SO":10,"pit_BB":6,"pit_BF":0,"pit_H":9,"pit_ER":5,"pit_pitches":104,"pit_strikes":60,"pit_per_ip":13.6,"pit_HBP":0,"G":7,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":37,"pit_rank":6,"gpt_rank":37,"ovr_rank":19},{"id":2,"name":"Hank H","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":16,"H":10,"BB":6,"HBP":4,"SO":0,"R":11,"SB":15,"TB":12,"PA":26,"2B":0,"3B":1,"HR":0,"AVG":0.625,"SLG":0.75,"OBP":0.769,"OPS":1.519,"score":58.8,"gpt_hit_score":58.8,"gpt_pit_score":21.1,"ovr_score":47.49,"outs":10,"IP":"3.1","ip_val":3.3333,"ERA":19.8,"K6":10.8,"BB6":21.6,"H6":5.4,"WHIP":4.5,"STR_PCT":null,"pit_SO":6,"pit_BB":12,"pit_BF":0,"pit_H":3,"pit_ER":11,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":0.0,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":8,"pit_rank":54,"gpt_rank":8,"ovr_rank":17},{"id":3,"name":"Brooks F","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":17,"H":9,"BB":4,"HBP":3,"SO":6,"R":10,"SB":7,"TB":13,"PA":24,"2B":2,"3B":1,"HR":0,"AVG":0.529,"SLG":0.765,"OBP":0.667,"OPS":1.432,"score":45.29,"gpt_hit_score":45.29,"gpt_pit_score":28.6,"ovr_score":40.28,"outs":17,"IP":"5.2","ip_val":5.6667,"ERA":9.53,"K6":12.7,"BB6":21.2,"H6":6.4,"WHIP":4.59,"STR_PCT":35.1,"pit_SO":12,"pit_BB":20,"pit_BF":0,"pit_H":6,"pit_ER":9,"pit_pitches":168,"pit_strikes":59,"pit_per_ip":29.6,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":24,"pit_rank":38,"gpt_rank":24,"ovr_rank":31},{"id":4,"name":"Cole H","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":14,"H":4,"BB":10,"HBP":0,"SO":9,"R":7,"SB":7,"TB":7,"PA":24,"2B":1,"3B":1,"HR":0,"AVG":0.286,"SLG":0.5,"OBP":0.583,"OPS":1.083,"score":31.75,"gpt_hit_score":31.75,"gpt_pit_score":12.9,"ovr_score":26.09,"outs":1,"IP":"0.1","ip_val":0.3333,"ERA":126.0,"K6":0.0,"BB6":180.0,"H6":0.0,"WHIP":30.0,"STR_PCT":16.7,"pit_SO":0,"pit_BB":10,"pit_BF":0,"pit_H":0,"pit_ER":7,"pit_pitches":30,"pit_strikes":5,"pit_per_ip":null,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":45,"pit_rank":67,"gpt_rank":45,"ovr_rank":57},{"id":5,"name":"Thomas S","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":18,"H":7,"BB":3,"HBP":1,"SO":7,"R":6,"SB":10,"TB":10,"PA":22,"2B":3,"3B":0,"HR":0,"AVG":0.389,"SLG":0.556,"OBP":0.5,"OPS":1.056,"score":32.53,"gpt_hit_score":32.53,"gpt_pit_score":67.5,"ovr_score":43.02,"outs":21,"IP":"7.0","ip_val":7.0,"ERA":7.71,"K6":6.9,"BB6":1.7,"H6":6.0,"WHIP":1.29,"STR_PCT":60.8,"pit_SO":8,"pit_BB":2,"pit_BF":0,"pit_H":7,"pit_ER":9,"pit_pitches":97,"pit_strikes":59,"pit_per_ip":13.9,"pit_HBP":0,"G":9,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":43,"pit_rank":4,"gpt_rank":43,"ovr_rank":28},{"id":6,"name":"Nolan H","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":10,"H":3,"BB":7,"HBP":0,"SO":6,"R":7,"SB":11,"TB":3,"PA":17,"2B":0,"3B":0,"HR":0,"AVG":0.3,"SLG":0.3,"OBP":0.588,"OPS":0.888,"score":28.88,"gpt_hit_score":28.88,"gpt_pit_score":null,"ovr_score":27.44,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":0,"pit_BF":0,"pit_H":0,"pit_ER":0,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":51,"pit_rank":null,"gpt_rank":51,"ovr_rank":50},{"id":7,"name":"Jordan B","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":9,"H":0,"BB":5,"HBP":0,"SO":6,"R":4,"SB":3,"TB":0,"PA":14,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.357,"OPS":0.357,"score":3.95,"gpt_hit_score":3.95,"gpt_pit_score":null,"ovr_score":3.75,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":0,"pit_BF":0,"pit_H":0,"pit_ER":0,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":7,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":91,"pit_rank":null,"gpt_rank":91,"ovr_rank":92},{"id":8,"name":"Sub","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":2,"H":1,"BB":0,"HBP":0,"SO":1,"R":1,"SB":0,"TB":1,"PA":2,"2B":0,"3B":0,"HR":0,"AVG":0.5,"SLG":0.5,"OBP":0.5,"OPS":1.0,"score":19.68,"gpt_hit_score":19.68,"gpt_pit_score":null,"ovr_score":18.7,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":0,"pit_BF":0,"pit_H":0,"pit_ER":0,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":1,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":null,"pit_rank":null,"gpt_rank":null,"ovr_rank":69},{"id":9,"name":"Jake T","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":12,"H":6,"BB":11,"HBP":0,"SO":3,"R":11,"SB":7,"TB":9,"PA":23,"2B":1,"3B":1,"HR":0,"AVG":0.5,"SLG":0.75,"OBP":0.739,"OPS":1.489,"score":52.36,"gpt_hit_score":52.36,"gpt_pit_score":8.9,"ovr_score":39.32,"outs":6,"IP":"2.0","ip_val":2.0,"ERA":33.0,"K6":6.0,"BB6":39.0,"H6":15.0,"WHIP":9.0,"STR_PCT":34.5,"pit_SO":2,"pit_BB":13,"pit_BF":0,"pit_H":5,"pit_ER":11,"pit_pitches":110,"pit_strikes":38,"pit_per_ip":null,"pit_HBP":0,"G":8,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":15,"pit_rank":74,"gpt_rank":15,"ovr_rank":33},{"id":10,"name":"Alexander S","team":"Timber Rattlers","team_key":"TIMBER_RATTLERS","AB":6,"H":0,"BB":2,"HBP":2,"SO":5,"R":4,"SB":6,"TB":0,"PA":10,"2B":0,"3B":0,"HR":0,"AVG":0.0,"SLG":0.0,"OBP":0.4,"OPS":0.4,"score":4.59,"gpt_hit_score":4.59,"gpt_pit_score":null,"ovr_score":4.36,"outs":0,"IP":"0.0","ip_val":0.0,"ERA":null,"K6":null,"BB6":null,"H6":null,"WHIP":null,"STR_PCT":null,"pit_SO":0,"pit_BB":0,"pit_BF":0,"pit_H":0,"pit_ER":0,"pit_pitches":0,"pit_strikes":0,"pit_per_ip":null,"pit_HBP":0,"G":5,"allstar":null,"allstar_color":null,"allstar_age":null,"def_adj":0,"off_rank":89,"pit_rank":null,"gpt_rank":89,"ovr_rank":91}];
+window._PJS=PLAYERS;
+const GAMES=[{"date":"Aug 16","opponent":"teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/a3767444-0a20-4a5b-8960-0ba5b106ae73","team_key":"TIN_CAPS","score_rs":3,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Aug 23","opponent":"teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/33e7f496-6230-4f95-94bc-eb7d327f65c4","team_key":"TIN_CAPS","score_rs":11,"score_opp":4,"is_scrimmage":false,"parsed":true},{"date":"Sep 6","opponent":"teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/7a2dab62-4814-4db3-87e9-64925085baa1","team_key":"TIN_CAPS","score_rs":10,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Sep 13","opponent":"teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/42c6bd7c-9978-4f49-8ecc-02f62cb02eea","team_key":"TIN_CAPS","score_rs":11,"score_opp":11,"is_scrimmage":false,"parsed":true},{"date":"Sep 20","opponent":"teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/ada1e971-a959-4f63-9c29-612060ed2086","team_key":"TIN_CAPS","score_rs":12,"score_opp":5,"is_scrimmage":false,"parsed":true},{"date":"Sep 27","opponent":"teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/b48ba056-c2f6-4fe3-94cc-c1be5bd691d4","team_key":"TIN_CAPS","score_rs":8,"score_opp":13,"is_scrimmage":false,"parsed":true},{"date":"Oct 4","opponent":"teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/84e59a31-d262-48f7-b21c-17fa903c5bbd","team_key":"TIN_CAPS","score_rs":12,"score_opp":7,"is_scrimmage":false,"parsed":true},{"date":"Oct 18","opponent":"teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/41557b19-dc7f-4855-b9e4-8b030b8960d1","team_key":"TIN_CAPS","score_rs":11,"score_opp":4,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/a2110033-0443-48a5-a162-4e49c019a296","team_key":"TIN_CAPS","score_rs":4,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/e5f52abf-26e5-40bf-af37-9b6888ad04a5","team_key":"TIN_CAPS","score_rs":12,"score_opp":8,"is_scrimmage":false,"parsed":true},{"date":"Oct 26","opponent":"TBD Oct 26, 2025 at Field 14 L 5-11 Get t","url":"https://web.gc.com/teams/ECaWvI9DZEAB/2025-fall-2025-mcb-aa-tin-caps/schedule/1f90545d-ec3a-47e4-b567-f348fa508287","team_key":"TIN_CAPS","score_rs":11,"score_opp":5,"is_scrimmage":false,"parsed":true},{"date":"Aug 16","opponent":"duleListByMonth__event\" href=\"/teams/Yw9","url":"https://web.gc.com/teams/Yw9xo9sFkrxX/schedule/schedule/a44178bd-61bc-40ad-b9cd-28830fb148b3","team_key":"MARAUDERS","score_rs":1,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Aug 23","opponent":"duleListByMonth__event\" href=\"/teams/Yw9","url":"https://web.gc.com/teams/Yw9xo9sFkrxX/schedule/schedule/ad2a030e-5304-40b2-8aab-605517f8dbd1","team_key":"MARAUDERS","score_rs":4,"score_opp":11,"is_scrimmage":false,"parsed":true},{"date":"Sep 6","opponent":"duleListByMonth__event\" href=\"/teams/Yw9","url":"https://web.gc.com/teams/Yw9xo9sFkrxX/schedule/schedule/e4dfb254-2692-4518-ac2c-15248f005592","team_key":"MARAUDERS","score_rs":12,"score_opp":7,"is_scrimmage":false,"parsed":true},{"date":"Sep 13","opponent":"duleListByMonth__event\" href=\"/teams/Yw9","url":"https://web.gc.com/teams/Yw9xo9sFkrxX/schedule/schedule/c45c309f-d0bf-4f2e-8040-d31446bb22bc","team_key":"MARAUDERS","score_rs":11,"score_opp":11,"is_scrimmage":false,"parsed":true},{"date":"Sep 20","opponent":"duleListByMonth__event\" href=\"/teams/Yw9","url":"https://web.gc.com/teams/Yw9xo9sFkrxX/schedule/schedule/2cdc4da7-5386-469c-9808-1e2e330ed0bf","team_key":"MARAUDERS","score_rs":6,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Sep 27","opponent":"duleListByMonth__event\" href=\"/teams/Yw9","url":"https://web.gc.com/teams/Yw9xo9sFkrxX/schedule/schedule/3235b350-373c-4a1a-a2ec-7b0bc0b40c0e","team_key":"MARAUDERS","score_rs":1,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Oct 4","opponent":"duleListByMonth__event\" href=\"/teams/Yw9","url":"https://web.gc.com/teams/Yw9xo9sFkrxX/schedule/schedule/fe6d187e-8511-4d13-98c3-6ab2035a95c8","team_key":"MARAUDERS","score_rs":4,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Oct 18","opponent":"duleListByMonth__event\" href=\"/teams/Yw9","url":"https://web.gc.com/teams/Yw9xo9sFkrxX/schedule/schedule/6871d7e3-9ad2-4c94-ae45-5b31da7b4709","team_key":"MARAUDERS","score_rs":10,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"TBD- 10/25/25, 3:00 PM W 9-8","url":"https://web.gc.com/teams/Yw9xo9sFkrxX/schedule/schedule/8e544826-521e-479d-a32f-fadfd0dfd178","team_key":"MARAUDERS","score_rs":8,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Oct 26","opponent":"duleListByMonth__event\" href=\"/teams/Yw9","url":"https://web.gc.com/teams/Yw9xo9sFkrxX/schedule/schedule/37566b64-739f-4175-b38a-f80044d53200","team_key":"MARAUDERS","score_rs":4,"score_opp":12,"is_scrimmage":false,"parsed":true},{"date":"Aug 16","opponent":"duleListByMonth__event\" href=\"/teams/ioq","url":"https://web.gc.com/teams/ioq8401K1IEV/schedule/schedule/6fbcbb89-aa60-463c-8d5d-50fda354b8c3","team_key":"MUSSELS","score_rs":8,"score_opp":3,"is_scrimmage":false,"parsed":true},{"date":"Aug 24","opponent":"duleListByMonth__event\" href=\"/teams/ioq","url":"https://web.gc.com/teams/ioq8401K1IEV/schedule/schedule/58adeff2-96b5-48bf-9042-be143d2f16db","team_key":"MUSSELS","score_rs":9,"score_opp":3,"is_scrimmage":false,"parsed":true},{"date":"Sep 6","opponent":"duleListByMonth__event\" href=\"/teams/ioq","url":"https://web.gc.com/teams/ioq8401K1IEV/schedule/schedule/37b5bd2f-8ab6-4eb4-9887-641cc631bbfb","team_key":"MUSSELS","score_rs":10,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Sep 13","opponent":"duleListByMonth__event\" href=\"/teams/ioq","url":"https://web.gc.com/teams/ioq8401K1IEV/schedule/schedule/e18460ea-bfa6-437b-80c9-4d27101eb0c8","team_key":"MUSSELS","score_rs":10,"score_opp":5,"is_scrimmage":false,"parsed":true},{"date":"Sep 20","opponent":"duleListByMonth__event\" href=\"/teams/ioq","url":"https://web.gc.com/teams/ioq8401K1IEV/schedule/schedule/e733700f-e18d-430e-ae7c-9f07e49778a5","team_key":"MUSSELS","score_rs":10,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Sep 27","opponent":"duleListByMonth__event\" href=\"/teams/ioq","url":"https://web.gc.com/teams/ioq8401K1IEV/schedule/schedule/39ecb251-53ef-42e8-9b66-af2e271f3616","team_key":"MUSSELS","score_rs":13,"score_opp":8,"is_scrimmage":false,"parsed":true},{"date":"Oct 4","opponent":"duleListByMonth__event\" href=\"/teams/ioq","url":"https://web.gc.com/teams/ioq8401K1IEV/schedule/schedule/5ee57793-c69b-46b3-b6fb-62c7e7c2d45d","team_key":"MUSSELS","score_rs":10,"score_opp":4,"is_scrimmage":false,"parsed":true},{"date":"Oct 18","opponent":"duleListByMonth__event\" href=\"/teams/ioq","url":"https://web.gc.com/teams/ioq8401K1IEV/schedule/schedule/bae8f11b-66b9-4a83-a67d-0bead164ca0e","team_key":"MUSSELS","score_rs":12,"score_opp":6,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"duleListByMonth__event\" href=\"/teams/ioq","url":"https://web.gc.com/teams/ioq8401K1IEV/schedule/schedule/14a9058a-5824-4821-8d7f-a315c864daf6","team_key":"MUSSELS","score_rs":9,"score_opp":4,"is_scrimmage":false,"parsed":true},{"date":"Oct 26","opponent":"duleListByMonth__event\" href=\"/teams/ioq","url":"https://web.gc.com/teams/ioq8401K1IEV/schedule/schedule/74130fcd-c765-4f94-81a0-b4c86dcd22dc","team_key":"MUSSELS","score_rs":4,"score_opp":12,"is_scrimmage":false,"parsed":true},{"date":"Aug 16","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/12dbf0a0-f3df-4ff4-9edd-1f70a1495d46","team_key":"TIDE","score_rs":2,"score_opp":11,"is_scrimmage":false,"parsed":true},{"date":"Aug 23","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/65cb7111-9844-4676-be75-1723c9451240","team_key":"TIDE","score_rs":9,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Sep 6","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/d0ee921a-164b-44ba-942e-1f157572da1a","team_key":"TIDE","score_rs":1,"score_opp":3,"is_scrimmage":false,"parsed":true},{"date":"Sep 7","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/b3d1a45e-64aa-4873-b654-b178da21d424","team_key":"TIDE","score_rs":7,"score_opp":5,"is_scrimmage":false,"parsed":true},{"date":"Sep 13","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/163d5858-f9ae-4813-8e19-15e0258abe2c","team_key":"TIDE","score_rs":12,"score_opp":11,"is_scrimmage":false,"parsed":true},{"date":"Sep 20","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/aabe9d63-f3a7-4879-8065-e11a5a12eced","team_key":"TIDE","score_rs":9,"score_opp":6,"is_scrimmage":false,"parsed":true},{"date":"Sep 27","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/74d37103-a8c7-4f3b-a144-1c5fa1ac5539","team_key":"TIDE","score_rs":8,"score_opp":8,"is_scrimmage":false,"parsed":true},{"date":"Oct 4","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/c3c2ef3b-3e3b-4f06-af3a-a6c8d88d6913","team_key":"TIDE","score_rs":9,"score_opp":8,"is_scrimmage":false,"parsed":true},{"date":"Oct 18","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/8c1cf46f-dd11-4a80-b25f-32df85b9d434","team_key":"TIDE","score_rs":12,"score_opp":11,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/96e51a45-d745-4519-8fd0-0489d4593991","team_key":"TIDE","score_rs":11,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Oct 26","opponent":"duleListByMonth__event\" href=\"/teams/0e0","url":"https://web.gc.com/teams/0e0xOLZIXoPq/schedule/schedule/56f1d911-6bf5-4949-89f3-b2f36d571c79","team_key":"TIDE","score_rs":6,"score_opp":15,"is_scrimmage":false,"parsed":true},{"date":"Aug 16","opponent":"duleListByMonth__event\" href=\"/teams/rtZ","url":"https://web.gc.com/teams/rtZQoPXdXl4d/schedule/schedule/d513519f-0c9b-44ba-b523-adf637974732","team_key":"HOOKS","score_rs":5,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Aug 23","opponent":"duleListByMonth__event\" href=\"/teams/rtZ","url":"https://web.gc.com/teams/rtZQoPXdXl4d/schedule/schedule/072692dd-2cce-4707-9b6a-98bee4cd469b","team_key":"HOOKS","score_rs":10,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Sep 6","opponent":"duleListByMonth__event\" href=\"/teams/rtZ","url":"https://web.gc.com/teams/rtZQoPXdXl4d/schedule/schedule/fce0f3b0-7e8d-4a21-a88a-4b77fe4312e6","team_key":"HOOKS","score_rs":7,"score_opp":6,"is_scrimmage":false,"parsed":true},{"date":"Sep 13","opponent":"duleListByMonth__event\" href=\"/teams/rtZ","url":"https://web.gc.com/teams/rtZQoPXdXl4d/schedule/schedule/d9db2766-5d59-4bd0-b53f-2aafed252125","team_key":"HOOKS","score_rs":5,"score_opp":11,"is_scrimmage":false,"parsed":true},{"date":"Sep 20","opponent":"duleListByMonth__event\" href=\"/teams/rtZ","url":"https://web.gc.com/teams/rtZQoPXdXl4d/schedule/schedule/6a381e16-233d-4adc-9d14-b000585a9abc","team_key":"HOOKS","score_rs":12,"score_opp":2,"is_scrimmage":false,"parsed":true},{"date":"Sep 27","opponent":"duleListByMonth__event\" href=\"/teams/rtZ","url":"https://web.gc.com/teams/rtZQoPXdXl4d/schedule/schedule/a5a31233-e2a1-4f8f-bc65-df5e36f5a00a","team_key":"HOOKS","score_rs":9,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Oct 4","opponent":"duleListByMonth__event\" href=\"/teams/rtZ","url":"https://web.gc.com/teams/rtZQoPXdXl4d/schedule/schedule/62ea8577-28a9-4958-9d20-b75b0fc85d80","team_key":"HOOKS","score_rs":6,"score_opp":12,"is_scrimmage":false,"parsed":true},{"date":"Oct 18","opponent":"duleListByMonth__event\" href=\"/teams/rtZ","url":"https://web.gc.com/teams/rtZQoPXdXl4d/schedule/schedule/75298373-c4d5-4005-b8a4-422e94ec268c","team_key":"HOOKS","score_rs":9,"score_opp":4,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"TBD- 10/25/25, 7:00 PM W 12-8","url":"https://web.gc.com/teams/rtZQoPXdXl4d/schedule/schedule/5ffd8d22-47f4-4843-a723-21c83edb6b2c","team_key":"HOOKS","score_rs":8,"score_opp":12,"is_scrimmage":false,"parsed":true},{"date":"Oct 26","opponent":"TBD- 10/26/25, 4:30 PM L 4-10 Get the App","url":"https://web.gc.com/teams/rtZQoPXdXl4d/schedule/schedule/91228cec-db42-4ac8-9f81-845be22d2d03","team_key":"HOOKS","score_rs":10,"score_opp":4,"is_scrimmage":false,"parsed":true},{"date":"Aug 16","opponent":"duleListByMonth__event\" href=\"/teams/CQg","url":"https://web.gc.com/teams/CQgMxpMmTeWS/schedule/schedule/a53b1cd6-c2a2-47de-8646-d4fd6818d2a2","team_key":"IRON_BIRDS","score_rs":null,"score_opp":null,"is_scrimmage":false,"parsed":false},{"date":"Aug 23","opponent":"duleListByMonth__event\" href=\"/teams/CQg","url":"https://web.gc.com/teams/CQgMxpMmTeWS/schedule/schedule/fbf72375-5a18-42e6-ac03-b81e381447cb","team_key":"IRON_BIRDS","score_rs":null,"score_opp":null,"is_scrimmage":false,"parsed":false},{"date":"Sep 6","opponent":"duleListByMonth__event\" href=\"/teams/CQg","url":"https://web.gc.com/teams/CQgMxpMmTeWS/schedule/schedule/8e563e6c-f027-426c-80f4-4a278963ac18","team_key":"IRON_BIRDS","score_rs":null,"score_opp":null,"is_scrimmage":false,"parsed":false},{"date":"Sep 13","opponent":"duleListByMonth__event\" href=\"/teams/CQg","url":"https://web.gc.com/teams/CQgMxpMmTeWS/schedule/schedule/f177ed79-d974-4158-871c-e33c49337758","team_key":"IRON_BIRDS","score_rs":null,"score_opp":null,"is_scrimmage":false,"parsed":false},{"date":"Sep 20","opponent":"duleListByMonth__event\" href=\"/teams/CQg","url":"https://web.gc.com/teams/CQgMxpMmTeWS/schedule/schedule/4b836489-3b39-4db2-89bf-8732e1322aaa","team_key":"IRON_BIRDS","score_rs":null,"score_opp":null,"is_scrimmage":false,"parsed":false},{"date":"Sep 27","opponent":"duleListByMonth__event\" href=\"/teams/CQg","url":"https://web.gc.com/teams/CQgMxpMmTeWS/schedule/schedule/c36a21dc-bb04-4485-b056-14e39de801c5","team_key":"IRON_BIRDS","score_rs":null,"score_opp":null,"is_scrimmage":false,"parsed":false},{"date":"Oct 4","opponent":"duleListByMonth__event\" href=\"/teams/CQg","url":"https://web.gc.com/teams/CQgMxpMmTeWS/schedule/schedule/4df9db64-5ed4-4777-97df-b6b84ecfaf5c","team_key":"IRON_BIRDS","score_rs":null,"score_opp":null,"is_scrimmage":false,"parsed":false},{"date":"Oct 18","opponent":"duleListByMonth__event\" href=\"/teams/CQg","url":"https://web.gc.com/teams/CQgMxpMmTeWS/schedule/schedule/91adc09d-682a-4960-a9c3-f28176a6b20f","team_key":"IRON_BIRDS","score_rs":null,"score_opp":null,"is_scrimmage":false,"parsed":false},{"date":"Aug 16","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/2a07a0f6-023f-4c00-9ad8-4f5f079afdc3","team_key":"RIVER_DOGS","score_rs":9,"score_opp":3,"is_scrimmage":false,"parsed":true},{"date":"Aug 23","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/d41a2cdf-cd0b-411c-845b-915b29c7cf9c","team_key":"RIVER_DOGS","score_rs":9,"score_opp":6,"is_scrimmage":false,"parsed":true},{"date":"Sep 6","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/0d44cbb8-5a58-414c-9526-f00288cb2438","team_key":"RIVER_DOGS","score_rs":7,"score_opp":12,"is_scrimmage":false,"parsed":true},{"date":"Sep 13","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/98a7b697-1352-4de5-a44c-d4be5fe95b58","team_key":"RIVER_DOGS","score_rs":9,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Sep 20","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/8a6f336a-8ab9-48ae-a7f0-23049f792687","team_key":"RIVER_DOGS","score_rs":11,"score_opp":11,"is_scrimmage":false,"parsed":true},{"date":"Sep 27","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/8f6a42d7-5fd1-4061-881d-b51dda63fb01","team_key":"RIVER_DOGS","score_rs":7,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Oct 4","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/acc5a93e-f813-4e8a-b657-2e25369a954c","team_key":"RIVER_DOGS","score_rs":8,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Oct 18","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/9c699abc-041c-4cfb-b4d1-6c8d2a0daa09","team_key":"RIVER_DOGS","score_rs":4,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/c9643f9e-d647-4b28-b09b-ff54d2a9ebe4","team_key":"RIVER_DOGS","score_rs":6,"score_opp":7,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/6061fede-b9cb-4ab9-8234-7224da86578c","team_key":"RIVER_DOGS","score_rs":11,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Oct 26","opponent":"duleListByMonth__event\" href=\"/teams/E5Z","url":"https://web.gc.com/teams/E5Z7oKDYLmeE/schedule/schedule/5e03bd60-9cd8-4d5b-9243-a17ba189e864","team_key":"RIVER_DOGS","score_rs":8,"score_opp":14,"is_scrimmage":false,"parsed":true},{"date":"Aug 16","opponent":"duleListByMonth__event\" href=\"/teams/HgK","url":"https://web.gc.com/teams/HgKnfvDSsMOR/schedule/schedule/42d37b87-f6f2-400f-a154-20ccc52e213b","team_key":"RED_WINGS","score_rs":11,"score_opp":2,"is_scrimmage":false,"parsed":true},{"date":"Sep 6","opponent":"duleListByMonth__event\" href=\"/teams/HgK","url":"https://web.gc.com/teams/HgKnfvDSsMOR/schedule/schedule/9d1f3984-4f21-4968-aa2c-3fcbe71a2c52","team_key":"RED_WINGS","score_rs":10,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Sep 13","opponent":"duleListByMonth__event\" href=\"/teams/HgK","url":"https://web.gc.com/teams/HgKnfvDSsMOR/schedule/schedule/da5817e3-4aa3-44be-a872-54987340ee33","team_key":"RED_WINGS","score_rs":12,"score_opp":7,"is_scrimmage":false,"parsed":true},{"date":"Sep 20","opponent":"duleListByMonth__event\" href=\"/teams/HgK","url":"https://web.gc.com/teams/HgKnfvDSsMOR/schedule/schedule/51fe4a06-1f07-4afa-8895-36e8f7ed306b","team_key":"RED_WINGS","score_rs":7,"score_opp":8,"is_scrimmage":false,"parsed":true},{"date":"Sep 21","opponent":"duleListByMonth__event\" href=\"/teams/HgK","url":"https://web.gc.com/teams/HgKnfvDSsMOR/schedule/schedule/b8997071-b912-449e-8ee5-f85fbd4d9a0a","team_key":"RED_WINGS","score_rs":11,"score_opp":11,"is_scrimmage":false,"parsed":true},{"date":"Sep 27","opponent":"duleListByMonth__event\" href=\"/teams/HgK","url":"https://web.gc.com/teams/HgKnfvDSsMOR/schedule/schedule/bfebb0ac-5d24-4c09-88c1-e8a2e5e74c67","team_key":"RED_WINGS","score_rs":9,"score_opp":7,"is_scrimmage":false,"parsed":true},{"date":"Oct 4","opponent":"duleListByMonth__event\" href=\"/teams/HgK","url":"https://web.gc.com/teams/HgKnfvDSsMOR/schedule/schedule/abe3062a-c9ee-472c-81b7-d2bf5f87b9dd","team_key":"RED_WINGS","score_rs":11,"score_opp":6,"is_scrimmage":false,"parsed":true},{"date":"Oct 18","opponent":"duleListByMonth__event\" href=\"/teams/HgK","url":"https://web.gc.com/teams/HgKnfvDSsMOR/schedule/schedule/a60570a4-f1bb-48f7-8abf-adfa8497be2f","team_key":"RED_WINGS","score_rs":11,"score_opp":12,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"Mudcats","url":"https://web.gc.com/teams/HgKnfvDSsMOR/schedule/schedule/4068ef33-33aa-4b31-9dfa-e9484001ef44","team_key":"RED_WINGS","score_rs":9,"score_opp":8,"is_scrimmage":false,"parsed":true},{"date":"Oct 26","opponent":"duleListByMonth__event\" href=\"/teams/HgK","url":"https://web.gc.com/teams/HgKnfvDSsMOR/schedule/schedule/2212f5b1-6214-41b3-981a-e92f951a2aa5","team_key":"RED_WINGS","score_rs":9,"score_opp":4,"is_scrimmage":false,"parsed":true},{"date":"Aug 16","opponent":"duleListByMonth__event\" href=\"/teams/Xjs","url":"https://web.gc.com/teams/XjstsZLMV3gW/schedule/schedule/5b6f4a91-2c0a-48c9-b47d-f65ad65176c9","team_key":"HOT_RODS","score_rs":14,"score_opp":15,"is_scrimmage":false,"parsed":true},{"date":"Sep 6","opponent":"duleListByMonth__event\" href=\"/teams/Xjs","url":"https://web.gc.com/teams/XjstsZLMV3gW/schedule/schedule/5123599e-baa6-41af-9ec4-d655cca6c8fd","team_key":"HOT_RODS","score_rs":10,"score_opp":8,"is_scrimmage":false,"parsed":true},{"date":"Sep 20","opponent":"duleListByMonth__event\" href=\"/teams/Xjs","url":"https://web.gc.com/teams/XjstsZLMV3gW/schedule/schedule/059d9743-4701-4bf6-bd38-31db8468594b","team_key":"HOT_RODS","score_rs":8,"score_opp":7,"is_scrimmage":false,"parsed":true},{"date":"Sep 27","opponent":"duleListByMonth__event\" href=\"/teams/Xjs","url":"https://web.gc.com/teams/XjstsZLMV3gW/schedule/schedule/c85fb4de-6afc-44ae-aa28-1ffe77ca3340","team_key":"HOT_RODS","score_rs":9,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Oct 4","opponent":"duleListByMonth__event\" href=\"/teams/Xjs","url":"https://web.gc.com/teams/XjstsZLMV3gW/schedule/schedule/477df238-fa70-4df0-bc60-580ee060b722","team_key":"HOT_RODS","score_rs":3,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Oct 18","opponent":"duleListByMonth__event\" href=\"/teams/Xjs","url":"https://web.gc.com/teams/XjstsZLMV3gW/schedule/schedule/2d71bdeb-4e0b-4c52-ac03-8944b3ea7c1f","team_key":"HOT_RODS","score_rs":4,"score_opp":10,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"duleListByMonth__event\" href=\"/teams/Xjs","url":"https://web.gc.com/teams/XjstsZLMV3gW/schedule/schedule/6cdbc4b3-cdd3-4bf3-a803-78e813a6f22e","team_key":"HOT_RODS","score_rs":7,"score_opp":6,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"Mcb aa iron birds","url":"https://web.gc.com/teams/XjstsZLMV3gW/schedule/schedule/57f8c419-cfa2-4043-bf73-cd9cf0528fea","team_key":"HOT_RODS","score_rs":7,"score_opp":6,"is_scrimmage":false,"parsed":true},{"date":"Oct 26","opponent":"duleListByMonth__event\" href=\"/teams/Xjs","url":"https://web.gc.com/teams/XjstsZLMV3gW/schedule/schedule/212e998d-f0a3-4bb6-a840-41ef57145b8e","team_key":"HOT_RODS","score_rs":14,"score_opp":6,"is_scrimmage":false,"parsed":true},{"date":"Aug 16","opponent":"duleListByMonth__event\" href=\"/teams/mqD","url":"https://web.gc.com/teams/mqDz4Ys0mlqZ/schedule/schedule/7795e8ae-0b35-4a2c-a131-af177ead7d53","team_key":"TIMBER_RATTLERS","score_rs":15,"score_opp":14,"is_scrimmage":false,"parsed":true},{"date":"Sep 6","opponent":"duleListByMonth__event\" href=\"/teams/mqD","url":"https://web.gc.com/teams/mqDz4Ys0mlqZ/schedule/schedule/519a5a20-259a-4e00-aa6c-5b08046c5c6b","team_key":"TIMBER_RATTLERS","score_rs":6,"score_opp":8,"is_scrimmage":false,"parsed":true},{"date":"Sep 13","opponent":"duleListByMonth__event\" href=\"/teams/mqD","url":"https://web.gc.com/teams/mqDz4Ys0mlqZ/schedule/schedule/ec8a4955-1a21-47d9-8d3b-9fe946f8946b","team_key":"TIMBER_RATTLERS","score_rs":6,"score_opp":12,"is_scrimmage":false,"parsed":true},{"date":"Sep 20","opponent":"duleListByMonth__event\" href=\"/teams/mqD","url":"https://web.gc.com/teams/mqDz4Ys0mlqZ/schedule/schedule/dfb63a61-1abc-43af-9dfd-8461e9950b88","team_key":"TIMBER_RATTLERS","score_rs":5,"score_opp":12,"is_scrimmage":false,"parsed":true},{"date":"Sep 27","opponent":"duleListByMonth__event\" href=\"/teams/mqD","url":"https://web.gc.com/teams/mqDz4Ys0mlqZ/schedule/schedule/523793b3-585e-4af3-ab43-94a5e2d9f42b","team_key":"TIMBER_RATTLERS","score_rs":10,"score_opp":1,"is_scrimmage":false,"parsed":true},{"date":"Oct 4","opponent":"duleListByMonth__event\" href=\"/teams/mqD","url":"https://web.gc.com/teams/mqDz4Ys0mlqZ/schedule/schedule/744bfdf2-c7b7-41a4-abd5-411ba8413157","team_key":"TIMBER_RATTLERS","score_rs":12,"score_opp":8,"is_scrimmage":false,"parsed":true},{"date":"Oct 18","opponent":"duleListByMonth__event\" href=\"/teams/mqD","url":"https://web.gc.com/teams/mqDz4Ys0mlqZ/schedule/schedule/45347e31-0b62-4406-84c5-2b18e52a0691","team_key":"TIMBER_RATTLERS","score_rs":11,"score_opp":9,"is_scrimmage":false,"parsed":true},{"date":"Oct 25","opponent":"duleListByMonth__event\" href=\"/teams/mqD","url":"https://web.gc.com/teams/mqDz4Ys0mlqZ/schedule/schedule/e2bb4f64-c362-4cbb-9df7-47b37505c3a0","team_key":"TIMBER_RATTLERS","score_rs":2,"score_opp":12,"is_scrimmage":false,"parsed":true},{"date":"Oct 26","opponent":"duleListByMonth__event\" href=\"/teams/mqD","url":"https://web.gc.com/teams/mqDz4Ys0mlqZ/schedule/schedule/e1c9fa8e-7c88-4a7f-9d7f-1deee9e99d66","team_key":"TIMBER_RATTLERS","score_rs":4,"score_opp":10,"is_scrimmage":false,"parsed":true}];
+
+const TC={'Tin Caps':'#5a3700','Marauders':'#FDB827','Mussels':'#002B5C','Tide':'#00385D','Hooks':'#EB6E1F','Iron Birds':'#DF4601','River Dogs':'#003087','Red Wings':'#C60C30','Hot Rods':'#092C5C','Timber Rattlers':'#2E7D32','Bulls':'#1a3a5c'};
+const TN={'TIN_CAPS':'Tin Caps','MARAUDERS':'Marauders','MUSSELS':'Mussels','TIDE':'Tide','HOOKS':'Hooks','IRON_BIRDS':'Iron Birds','RIVER_DOGS':'River Dogs','RED_WINGS':'Red Wings','HOT_RODS':'Hot Rods','TIMBER_RATTLERS':'Timber Rattlers','BULLS':'Bulls'};
+function pill(t){const c=TC[t]||'#aaa';return `<span class="pill" style="color:${c};background:${c}18;border:1px solid ${c}30">${t}</span>`;}
+
+const teams=[...new Set(PLAYERS.map(p=>p.team))].sort();
+const sel=document.getElementById('team');
+teams.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);});
+
+let tab='ovr',sortCol=null,sortDir=-1;
+
+function setTab(t){
+  tab=t;
+  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',['ovr','hit','pit','gl'][i]===t));
+  document.getElementById('pa-flt').style.display=(t==='pit'||t==='gl')?'none':'flex';
+  document.getElementById('ip-flt').style.display=(t==='hit'||t==='gl')?'none':'flex';
+  document.getElementById('srch').placeholder=t==='gl'?'🔍  Search team...':'🔍  Search player or team...';
+  sortCol=null;render();
+}
+function srt(col){sortCol===col?sortDir*=-1:(sortCol=col,sortDir=-1);render();}
+
+function fv(v,d=3){
+  if(v===null||v===undefined||isNaN(v)||v==='None'||v==='null')return'<span class="dim">—</span>';
+  const n=parseFloat(v);if(isNaN(n))return'<span class="dim">—</span>';
+  if(d===3)return n>=1?n.toFixed(3):'.'+String(Math.round(n*1000)).padStart(3,'0');
+  return n.toFixed(d);
+}
+function fc(v,hi,lo,d=3,inv=false){
+  if(v===null||v===undefined||isNaN(v)||v==='None')return'<span class="dim">—</span>';
+  const n=parseFloat(v);if(isNaN(n))return'<span class="dim">—</span>';
+  const s=d===3?fv(v):n.toFixed(d);
+  let cls='';
+  if(inv){cls=hi!==null&&n<=hi?'hi':lo!==null&&n>=lo?'lo':'';}
+  else{cls=hi!==null&&n>=hi?'hi':lo!==null&&n<=lo?'lo':'';}
+  return cls?`<span class="${cls}">${s}</span>`:s;
+}
+function rb(r){
+  if(!r)return'<span class="dim">—</span>';
+  return r<=3?`<span class="gold">${r===1?'🥇':r===2?'🥈':'🥉'}</span>`:`<span class="${r<=10?'':'dim'}">${r}</span>`;
+}
+function getData(){
+  const q=document.getElementById('srch').value.toLowerCase().trim();
+  const t=document.getElementById('team').value;
+  const mpa=+document.getElementById('mpa').value;
+  const mip=+document.getElementById('mip').value;
+  return PLAYERS.filter(p=>{
+    if(t&&p.team!==t)return false;
+    if(asFilter&&!((!p.allstar_color&&!p.allstar)||((p.allstar_color||p.allstar)===asFilter||(p.allstar_age||p.allstar)===asFilter)))return false;
+    if(q&&!p.name.toLowerCase().includes(q)&&!p.team.toLowerCase().includes(q))return false;
+    if(tab==='hit'&&p.PA<mpa)return false;
+    if(tab==='pit'&&(p.outs<mip*3||p.outs===0))return false;
+    if(tab==='ovr'){const h=p.PA>=mpa,pi=p.outs>=mip*3&&p.outs>0;if(!h&&!pi)return false;}
+    return true;
+  });
+}
+function sortData(data){
+  if(!sortCol)return data;
+  return[...data].sort((a,b)=>{
+    let av=a[sortCol],bv=b[sortCol];
+    if(typeof av==='string'&&typeof bv==='string')return av.localeCompare(bv)*sortDir;
+    av=parseFloat(av); bv=parseFloat(bv);
+    if(isNaN(av))av=sortDir>0?999999:-999999;
+    if(isNaN(bv))bv=sortDir>0?999999:-999999;
+    return(av-bv)*sortDir;
+  });
+}
+function th(key,label,cls=''){
+  const ac=sortCol===key?' active':'',ar=sortCol===key?(sortDir>0?' ↑':' ↓'):'';
+  return `<th class="${cls}${ac}" onclick="srt('${key}')">${label}${ar}</th>`;
+}
+
+function setAsFilter(v){
+  asFilter=v;
+  ['gold','blue','white','red'].forEach(k=>{
+    const btn=document.getElementById('asf-'+k);
+    if(btn){btn.className='as-filter-btn'+(v&&v.toLowerCase()===k?' active-'+k:'');}
+  });
+  const allBtn=document.getElementById('asf-all');
+  if(allBtn) allBtn.style.color=v?'var(--muted)':'var(--text)';
+  render();
+}
+
+function render(){
+  if(tab==='gl'){renderGl();return;}
+  const data=sortData(getData());
+  if(tab==='hit')renderHit(data);
+  else if(tab==='pit')renderPit(data);
+  else renderOvr(data);
+}
+
+function defTag(p){
+  return p.def_adj>=8?'<sup class="def-up">↑↑</sup>':p.def_adj>=4?'<sup class="def-up">↑</sup>':p.def_adj<=-5?'<sup class="def-dn">↓</sup>':'';
+}
+function rsTag(p){return p.rs_no_sb?'<sup class="rs-star">★</sup>':'';}
+
+const AS_CLASS={'Gold':'as-gold','Blue':'as-blue','White':'as-white','Red':'as-red'};
+const AS_ROW={'Gold':'as-gold-row','Blue':'as-blue-row','White':'as-white-row','Red':'as-red-row'};
+function asBadge(p){if(!p.allstar)return '';return `<span class="as-badge ${AS_CLASS[p.allstar]}">${p.allstar}</span>`;}
+function asRowClass(p){return p.allstar?AS_ROW[p.allstar]:'';}
+let asFilter=null;
+
+
+function renderOvr(data){
+  const sorted=sortCol?data:[...data].sort((a,b)=>(b.ovr_score||0)-(a.ovr_score||0));
+  document.getElementById('thead').innerHTML=`<tr>
+    ${th('ovr_rank','#','L')}${th('name','Player','L')}${th('team','Team','L')}
+    ${th('ovr_score','Score')}${th('AVG','AVG')}${th('SLG','SLG')}${th('PA','PA')}
+    ${th('BB','BB')}${th('SO','K')}${th('IP','IP')}
+    ${th('K6','K/6')}${th('BB6','BB/6')}${th('STR_PCT','STR%')}${th('WHIP','WHIP')}${th('ERA','ERA/6')}
+  </tr>`;
+  if(!sorted.length){document.getElementById('tbody').innerHTML=`<tr><td colspan="15" class="empty">No players match</td></tr>`;return;}
+  document.getElementById('tbody').innerHTML=sorted.map((p,i)=>{
+    const rk=sortCol?i+1:(p.ovr_rank||i+1);
+    const ip=(p.IP==='0.0'||!p.IP||p.outs===0)?'<span class="dim">—</span>':p.IP;
+    return `<tr onclick="openModal('${p.name}','${p.team_key}')">
+      <td class="rk L">${rb(rk)}</td>
+      <td class="L nm">${p.name}${asBadge(p)}</td>
+      <td class="L">${pill(p.team)}</td>
+      <td class="gold">${p.ovr_score!=null?p.ovr_score:'—'}</td>
+      <td>${(p.AVG>=.450?'<span class="hi">'+fv(p.AVG)+'</span>':p.AVG<=.275?'<span class="lo">'+fv(p.AVG)+'</span>':fv(p.AVG))}</td><td>${(p.SLG>=.600?'<span class="hi">'+fv(p.SLG)+'</span>':p.SLG<=.400?'<span class="lo">'+fv(p.SLG)+'</span>':fv(p.SLG))}</td>
+      <td>${p.PA||0}</td>
+      <td>${p.BB||0}</td><td>${p.SO||0}</td>
+      <td class="dim">${ip}</td>
+      <td>${(p.K6!=null?(p.K6>=10?'<span class="hi">'+p.K6.toFixed(1)+'</span>':p.K6<=7?'<span class="lo">'+p.K6.toFixed(1)+'</span>':p.K6.toFixed(1)):'--')}</td><td>${(p.BB6!=null?(p.BB6<=6?'<span class="hi">'+p.BB6.toFixed(1)+'</span>':p.BB6>=9?'<span class="lo">'+p.BB6.toFixed(1)+'</span>':p.BB6.toFixed(1)):'--')}</td><td>${p.STR_PCT&&p.STR_PCT!=='None'?parseFloat(p.STR_PCT).toFixed(1)+'%':'—'}</td>
+      <td>${fv(p.WHIP)}</td>
+      <td>${(p.ERA!=null?p.ERA.toFixed(2):'--')}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderHit(data){
+  // Default sort: AVG descending
+  const sorted = sortCol ? data : [...data].sort((a,b)=>(b.AVG||0)-(a.AVG||0));
+  document.getElementById('thead').innerHTML=`<tr>
+    ${th('AVG','#','L')}${th('name','Player','L')}${th('team','Team','L')}
+    ${th('score','Score')}${th('AVG','AVG')}${th('SLG','SLG')}
+    ${th('PA','PA')}${th('BB','BB')}${th('SO','K')}${th('R','R')}${th('SB','SB')}
+  </tr>`;
+  if(!sorted.length){document.getElementById('tbody').innerHTML=`<tr><td colspan="11" class="empty">No hitters match</td></tr>`;return;}
+  document.getElementById('tbody').innerHTML=sorted.map((p,i)=>{
+    const rk=i+1;
+    const sbVal=p.rs_no_sb?`<span class="sb-na">★</span>`:(p.SB||0);
+    return `<tr class="${asRowClass(p)}" onclick="openModal('${p.name}','${p.team_key}')">
+      <td class="rk L">${rk}</td>
+      <td class="L nm">${p.name}${asBadge(p)}</td>
+      <td class="L">${pill(p.team)}</td>
+      <td class="gold">${p.score||'—'}</td>
+      <td>${(p.AVG>=.450?'<span class="hi">'+fv(p.AVG)+'</span>':p.AVG<=.275?'<span class="lo">'+fv(p.AVG)+'</span>':fv(p.AVG))}</td><td>${(p.SLG>=.600?'<span class="hi">'+fv(p.SLG)+'</span>':p.SLG<=.400?'<span class="lo">'+fv(p.SLG)+'</span>':fv(p.SLG))}</td>
+      <td>${p.PA||0}</td><td>${p.BB||0}</td><td>${p.SO||0}</td>
+      <td>${p.R||0}</td><td>${sbVal}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPit(data){
+  // Default sort: STR% descending (higher strike% = better)
+  const sorted = sortCol ? data : [...data].sort((a,b)=>{
+    const av=parseFloat(a.STR_PCT)||0, bv=parseFloat(b.STR_PCT)||0;
+    return bv-av;
+  });
+  document.getElementById('thead').innerHTML=`<tr>
+    ${th('STR_PCT','#','L')}${th('name','Player','L')}${th('team','Team','L')}
+    ${th('IP','IP')}${th('K6','K/6')}${th('BB6','BB/6')}${th('H6','H/6')}
+    ${th('STR_PCT','STR%')}${th('ERA','ERA')}
+  </tr>`;
+  if(!sorted.length){document.getElementById('tbody').innerHTML=`<tr><td colspan="9" class="empty">No pitchers match</td></tr>`;return;}
+  document.getElementById('tbody').innerHTML=sorted.map((p,i)=>{
+    const rk=i+1;
+    const outs=p.outs||0;
+    const ipStr=`${Math.floor(outs/3)}.${outs%3}`;
+    const sp=p.STR_PCT&&p.STR_PCT!=='None'&&p.STR_PCT!==null?`${parseFloat(p.STR_PCT).toFixed(1)}%`:'<span class="dim">—</span>';
+    return `<tr class="${asRowClass(p)}" onclick="openModal('${p.name}','${p.team_key}')">
+      <td class="rk L">${rk}</td>
+      <td class="L nm">${p.name}${asBadge(p)}</td>
+      <td class="L">${pill(p.team)}</td>
+      <td class="dim">${ipStr}</td>
+      <td>${(p.K6!=null?(p.K6>=10?'<span class="hi">'+p.K6.toFixed(1)+'</span>':p.K6<=7?'<span class="lo">'+p.K6.toFixed(1)+'</span>':p.K6.toFixed(1)):'--')}</td>
+      <td>${(p.BB6!=null?(p.BB6<=6?'<span class="hi">'+p.BB6.toFixed(1)+'</span>':p.BB6>=9?'<span class="lo">'+p.BB6.toFixed(1)+'</span>':p.BB6.toFixed(1)):'--')}</td>
+      <td>${p.H6!==null&&p.H6!==undefined?parseFloat(p.H6).toFixed(1):'<span class="dim">—</span>'}</td>
+      <td>${sp}</td>
+      <td>${(p.ERA!=null?p.ERA.toFixed(2):'--')}</td>
+    </tr>`;
+  }).join('');
+}
+// ── All-star filter + badge overrides ────────────────────────────────────
+(function(){
+  window._asColorFilter = null;
+  window._asAgeFilter   = null;
+
+  function _applyFilter(p){
+    var cf=window._asColorFilter, af=window._asAgeFilter;
+    if(!cf&&!af)return true;
+    if(!p.allstar)return false;
+    var col=p.allstar_color||p.allstar;
+    var age=p.allstar_age||'';
+    if(cf&&af)return col===cf&&age===af;
+    if(cf)return col===cf;
+    if(af)return age===af;
+    return true;
+  }
+
+  function _patch(){
+    if(typeof getData==='function'){
+      var _orig=getData;
+      window.getData=function(){
+        if(!window._asColorFilter&&!window._asAgeFilter)return _orig();
+        var prev=window.asFilter; window.asFilter=null;
+        var all=_orig(); window.asFilter=prev;
+        return all.filter(_applyFilter);
+      };
+    }
+    window.setAsFilter=function(v){
+      var AGE_VALS={U10:1,U11:1,'9U':1,'10U':1,'11U':1,'12U':1};
+      if(!v){
+        window._asColorFilter=null;window._asAgeFilter=null;window.asFilter=null;
+      }else if(AGE_VALS[v]){
+        window._asAgeFilter=(window._asAgeFilter===v)?null:v;
+        window.asFilter=window._asAgeFilter;
+      }else{
+        window._asColorFilter=(window._asColorFilter===v)?null:v;
+        window.asFilter=window._asColorFilter;
+      }
+      document.querySelectorAll('.as-filter-btn').forEach(function(b){
+        var bv=b.dataset&&b.dataset.filter;
+        if(!bv)return;
+        var on=(bv===window._asColorFilter)||(bv===window._asAgeFilter);
+        ['gold','blue','white','red'].forEach(function(k){b.classList.remove('active-'+k);});
+        if(on){
+          var found=false;
+          ['gold','blue','white','red'].forEach(function(k){
+            if(bv.toLowerCase()===k){b.classList.add('active-'+k);found=true;}
+          });
+          if(!found)b.classList.add('active-gold');
+        }
+      });
+      render();
+    };
+    window.asBadge=function(p){
+      if(!p.allstar)return '';
+      var col=p.allstar_color||p.allstar;
+      var age=p.allstar_age;
+      var cls=(typeof AS_CLASS!=='undefined'&&AS_CLASS[p.allstar])||('as-'+col.toLowerCase());
+      var label=age?col:(col+' Sox');
+      var a=age?'<span style="font-size:9px;opacity:.65;margin-left:3px">'+age+'</span>':'';
+      return '<span class="as-badge '+cls+'">'+label+a+'</span>';
+    };
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',_patch);
+  }else{_patch();}
+})();
+function filterTeam(v){
+  document.getElementById("team").value=v;
+  render();
+}
+(function(){  var _origGetData=getData;  getData=function(tab,tf,sf,sd){    var cols=_origGetData(tab,tf,sf,sd);    cols.forEach(function(c){      if(c.key==="IP"){        c.sortKey="ip_val";      }    });    return cols;  };})();
+window.addEventListener("DOMContentLoaded", function(){
+  var sel = document.getElementById("team");
+  if(sel){ sel.value=""; }
+  var visSel = document.querySelector(".ctrl select");
+  if(visSel){ visSel.value=""; }
+  render();
+  var ths = document.querySelectorAll("#thead th");
+  for(var i=0;i<ths.length;i++){
+    if(ths[i].textContent.trim()==="RATING"){ ths[i].click(); break; }
+  }
+  // Patch Teams tab button to show team totals view
+  var _st=window.setTab;
+  window.setTab=function(t){
+    var tv=document.getElementById("teams-view");
+    var tw=document.querySelector(".tbl-wrap");
+    var ctrl=document.querySelector(".ctrl");
+    if(t==="bracket"){if(tv)tv.style.display="none";var _bvb=document.getElementById("bracket-view");if(_bvb)_bvb.style.display="block";if(tw)tw.style.display="none";if(ctrl)ctrl.style.display="none";renderBracket();document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("on",b.textContent.trim()==="Playoffs");});} else if(t==="teams"){
+      if(tv)tv.style.display="block";
+      if(tw)tw.style.display="none";
+      if(ctrl)ctrl.style.display="none";
+      document.querySelectorAll(".tab").forEach(function(b){
+        b.classList.toggle("on",b.textContent.trim()==="Teams");
+      });
+      renderTeams();
+    } else {
+      if(tv)tv.style.display="none";
+      if(tw)tw.style.display="";
+      if(ctrl)ctrl.style.display="";
+      if(_st)_st(t);
+    }
+  };
+});
+function renderTeams(){
+  var tv=document.getElementById('teams-view');
+  var players=window._PJS||[];
+  if(!players.length){tv.innerHTML='<p style="color:var(--muted);padding:20px">No data loaded.</p>';return;}
+  if(!window._teamSort)window._teamSort={k:'hitRtg',d:-1};
+  var ts=window._teamSort;
+  // Build W/L/T from GAMES array
+  var records={};
+  var allGames=typeof GAMES!=='undefined'?GAMES:[];
+  allGames.forEach(function(g){
+    if(g.score_rs==null||g.score_opp==null)return;
+    var tk=g.team_key;
+    if(!records[tk])records[tk]={w:0,l:0,t:0,rs:0,ra:0};
+    var r=records[tk];
+    r.rs+=g.score_rs; r.ra+=g.score_opp;
+    if(g.score_rs>g.score_opp)r.w++;
+    else if(g.score_rs<g.score_opp)r.l++;
+    else r.t++;
+  });
+  var teams={};
+  players.forEach(function(p){
+    var t=p.team;
+    if(!teams[t])teams[t]={name:t,tk:p.team_key,ab:0,h:0,bb:0,so:0,sb:0,tb:0,pa:0,hbp:0,r:0,d2:0,d3:0,hr:0,outs:0,strikes:0,pitches:0,sop:0,bbp:0,ratings:[],pitRatings:[]};
+    var d=teams[t];
+    d.ab+=p.AB||0;d.h+=p.H||0;d.bb+=p.BB||0;d.so+=p.SO||0;
+    d.sb+=p.SB||0;d.tb+=p.TB||0;d.pa+=p.PA||0;d.hbp+=p.HBP||0;
+    d.r+=p.R||0;d.d2+=p['2B']||0;d.d3+=p['3B']||0;d.hr+=p.HR||0;
+    if((p.PA||0)>=8)d.ratings.push(p.score||0);
+    if((p.outs||0)>=1&&p.gpt_pit_score!=null){
+      d.outs+=p.outs||0;d.strikes+=p.pit_strikes||0;d.pitches+=p.pit_pitches||0;
+      d.sop+=p.pit_SO||0;d.bbp+=p.pit_BB||0;d.pitRatings.push(p.gpt_pit_score);
+    }
+  });
+  var rows=Object.values(teams).filter(function(d){return d.pa>0;});
+  rows.forEach(function(d){
+    d.avg=d.ab>0?d.h/d.ab:0;d.slg=d.ab>0?d.tb/d.ab:0;
+    d.obp=d.pa>0?(d.h+d.bb+d.hbp)/d.pa:0;
+    d.kpct=d.pa>0?d.so/d.pa:0;d.bbpct=d.pa>0?d.bb/d.pa:0;
+    d.strpct=d.pitches>0?d.strikes/d.pitches*100:null;
+    d.hitRtg=d.ratings.length?d.ratings.reduce(function(a,b){return a+b;},0)/d.ratings.length:0;
+    d.pitRtg=d.pitRatings.length?d.pitRatings.reduce(function(a,b){return a+b;},0)/d.pitRatings.length:0;
+    d.ipDisp=d.outs>0?Math.floor(d.outs/3)+'.'+(d.outs%3):'--';
+    var rec=records[d.tk]||{w:0,l:0,t:0,rs:0,ra:0};
+    d.w=rec.w; d.l=rec.l; d.t=rec.t;
+    var gp=rec.w+rec.l+rec.t;
+    d.pct=gp>0?((rec.w+rec.t*0.5)/gp):0;
+    d.diff=rec.rs-rec.ra;
+  });
+  var f3=function(v){return v!=null?('.'+Math.round(v*1000).toString().padStart(3,'0')):'--';};
+  var f1=function(v){return v!=null?v.toFixed(1):'--';};
+  var fp=function(v){return v!=null?(v*100).toFixed(1)+'%':'--';};
+  var fr=function(v){return v>0?v.toFixed(1):'--';};
+  var fp3=function(v){return v>0?('.'+Math.round(v*1000).toString().padStart(3,'0')):'--';};
+  var cols=[
+    {k:'rank',  lbl:'#',      div:0,fmt:function(d,i){return i+1;}},
+    {k:'name',  lbl:'Team',   div:0,fmt:function(d){return d.name;}},
+    {k:'w',     lbl:'W',      div:0,fmt:function(d){return d.w;}},
+    {k:'l',     lbl:'L',      div:0,fmt:function(d){return d.l;}},
+    {k:'t',     lbl:'T',      div:0,fmt:function(d){return d.t;}},
+    {k:'pct',   lbl:'Pct',    div:0,fmt:function(d){return fp3(d.pct);}},
+    {k:'diff',  lbl:'+/-',    div:0,fmt:function(d){return (d.diff>0?'+':'')+d.diff;}},
+    {k:'hitRtg',lbl:'Hit Rtg',div:1,fmt:function(d){return fr(d.hitRtg);}},
+    {k:'avg',   lbl:'AVG',    div:0,fmt:function(d){return f3(d.avg);}},
+    {k:'obp',   lbl:'OBP',    div:0,fmt:function(d){return f3(d.obp);}},
+    {k:'slg',   lbl:'SLG',    div:0,fmt:function(d){return f3(d.slg);}},
+    {k:'r',     lbl:'R',      div:0,fmt:function(d){return d.r;}},
+    {k:'d2',    lbl:'2B',     div:0,fmt:function(d){return d.d2;}},
+    {k:'d3',    lbl:'3B',     div:0,fmt:function(d){return d.d3;}},
+    {k:'hr',    lbl:'HR',     div:0,fmt:function(d){return d.hr;}},
+    {k:'kpct',  lbl:'K%',     div:0,fmt:function(d){return fp(d.kpct);}},
+    {k:'bbpct', lbl:'BB%',    div:0,fmt:function(d){return fp(d.bbpct);}},
+    {k:'pitRtg',lbl:'Pit Rtg',div:1,fmt:function(d){return fr(d.pitRtg);}},
+    {k:'ipDisp',lbl:'IP',     div:0,fmt:function(d){return d.ipDisp;}},
+    {k:'sop',   lbl:'K',      div:0,fmt:function(d){return d.sop;}},
+    {k:'bbp',   lbl:'BB',     div:0,fmt:function(d){return d.bbp;}},
+    {k:'strpct',lbl:'STR%',   div:0,fmt:function(d){return f1(d.strpct);}},
+  ];
+  rows.sort(function(a,b){return ts.d*((a[ts.k]||0)-(b[ts.k]||0));});
+  var th=cols.map(function(c,i){
+    var al=i<=1?'left':'right';
+    var bdr=c.div?'border-left:2px solid var(--border);':'';
+    var bg=c.k===ts.k?'background:rgba(245,197,24,.08);':'';
+    var cur=c.k==='rank'||c.k==='name'?'':'cursor:pointer;';
+    var arr=c.k===ts.k?(ts.d===-1?' \u2193':' \u2191'):'';
+    var oc='';
+    if(c.k!=='rank'&&c.k!=='name'){
+      oc=' onclick="window._teamSort.k===\''+c.k+'\'?window._teamSort.d*=-1:(window._teamSort.k=\''+c.k+'\',window._teamSort.d=-1);renderTeams()"';
+    }
+    return '<th style="'+bdr+bg+cur+'padding:6px 6px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:'+al+';white-space:nowrap"'+oc+'>'+c.lbl+arr+'</th>';
+  }).join('');
+  var tbody=rows.map(function(d,i){
+    var tds=cols.map(function(c,ci){
+      var al=ci<=1?'left':'right';
+      var bdr=c.div?'border-left:2px solid var(--border);':'';
+      var bg=c.k===ts.k?'background:rgba(245,197,24,.05);':'';
+      var fw=ci<=1?'font-weight:600;':'';
+      return '<td style="'+bdr+bg+fw+'padding:5px 6px;text-align:'+al+'">'+c.fmt(d,i)+'</td>';
+    }).join('');
+    return '<tr style="border-bottom:0.5px solid var(--border)">'+tds+'</tr>';
+  }).join('');
+  tv.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">'+
+    '<thead><tr style="border-bottom:1px solid var(--border)">'+th+'</tr></thead>'+
+    '<tbody>'+tbody+'</tbody></table></div>';
+}
+
+function renderBracket(){var tv=document.getElementById('bracket-view');if(!tv)return;tv.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted)"><span style="font-family:Oswald,sans-serif;font-size:16px">MCB AA Fall 2025 Playoffs</span><br><br><span style="font-size:13px">Playoff bracket will be posted when available.</span></div>';}
+
+function renderGl(){
+  document.getElementById('pa-flt').style.display='none';
+  document.getElementById('ip-flt').style.display='none';
+  const q=document.getElementById('srch').value.toLowerCase().trim();
+  const tf=document.getElementById('team').value;
+  const gs=GAMES.filter(function(g){
+    const tm=TN[g.team_key]||g.team_key;
+    if(tf&&tm!==tf)return false;
+    if(q&&!tm.toLowerCase().includes(q)&&!g.opponent.toLowerCase().includes(q))return false;
+    return true;
+  });
+  document.getElementById('thead').innerHTML='<tr><th class="L">Team</th><th class="L">Date</th><th class="L">Opponent</th><th>RS</th><th>RA</th><th class="L">Result</th><th></th></tr>';
+  document.getElementById('tbody').innerHTML=gs.map(function(g){
+    const tm=TN[g.team_key]||g.team_key;
+    const rs=g.score_rs!=null?g.score_rs:'--';
+    const ra=g.score_opp!=null?g.score_opp:'--';
+    let res='<span class="dim">--</span>';
+    if(g.score_rs!=null&&g.score_opp!=null){
+      if(g.score_rs>g.score_opp)res='<span class="hi">W</span>';
+      else if(g.score_rs<g.score_opp)res='<span class="lo">L</span>';
+      else res='T';
+    }
+    return '<tr><td class="L">'+pill(tm)+'</td><td class="L dim" style="font-size:12px">'+g.date+'</td><td class="L">'+g.opponent+'</td><td style="font-family:Oswald,sans-serif;font-weight:600">'+rs+'</td><td style="font-family:Oswald,sans-serif;font-weight:600">'+ra+'</td><td>'+res+'</td>'+(g.url?'<td><a href="'+g.url+'" target="_blank" style="font-size:10px;color:var(--muted);text-decoration:none" title="Box Score">&#9654;</a></td>':'<td></td>')+'</tr>';
+  }).join('');
+}
+
+const pmap={};
+PLAYERS.forEach(function(p){pmap[p.name+'|'+p.team_key]=p;});
+function openModal(name,tk){
+  const p=pmap[name+'|'+tk]; if(!p)return;
+  const o=p.outs||0;
+  const ipS=Math.floor(o/3)+'.'+o%3;
+  const hasPit=o>=9&&p.ERA!=null&&!isNaN(parseFloat(p.ERA));
+  const sp=p.STR_PCT!=null?(parseFloat(p.STR_PCT).toFixed(1)+'%'):'--';
+  const iso=(p.SLG-p.AVG).toFixed(3);
+  const fv=function(v){if(v==null||isNaN(v))return'<span class="dim">--</span>';const n=parseFloat(v);return n>=1?n.toFixed(3):'.'+String(Math.round(n*1000)).padStart(3,'0');};
+  const fc=function(v,hi,lo,d,inv){if(v==null||isNaN(v))return'<span class="dim">--</span>';const n=parseFloat(v);const s=d===3?fv(v):n.toFixed(d||2);let cls='';if(inv){cls=hi!=null&&n<=hi?'hi':lo!=null&&n>=lo?'lo':'';}else{cls=hi!=null&&n>=hi?'hi':lo!=null&&n<=lo?'lo':'';}return cls?'<span class="'+cls+'">'+s+'</span>':s;};
+  const AS_CLASS={'Gold':'as-gold','Blue':'as-blue','White':'as-white','Red':'as-red'};
+  const asBadge=p.allstar?(' <span class="as-badge '+AS_CLASS[p.allstar]+'">'+p.allstar+' Sox</span>'):'';
+  let hitSec='<div style="color:var(--muted);font-size:12px;margin:8px 0">Insufficient batting data (min 8 PA)</div>';
+  if(p.PA>=8){
+    hitSec='<div class="sec">Batting</div><div class="stat-grid">'+
+      '<div class="sr"><span class="sl">AVG</span><span class="sv">'+fv(p.AVG)+'</span></div>'+
+      '<div class="sr"><span class="sl">SLG</span><span class="sv">'+fv(p.SLG)+'</span></div>'+
+      '<div class="sr"><span class="sl">OBP</span><span class="sv">'+fv(p.OBP)+'</span></div>'+
+      '<div class="sr"><span class="sl">OPS</span><span class="sv">'+fv(p.OPS)+'</span></div>'+
+      '<div class="sr"><span class="sl">ISO</span><span class="sv">'+iso+'</span></div>'+
+      '<div class="sr"><span class="sl">PA / AB</span><span class="sv">'+p.PA+' / '+p.AB+'</span></div>'+
+      '<div class="sr"><span class="sl">H</span><span class="sv">'+p.H+'</span></div>'+
+      '<div class="sr"><span class="sl">2B / 3B / HR</span><span class="sv">'+(p['2B']||0)+' / '+(p['3B']||0)+' / '+(p.HR||0)+'</span></div>'+
+      '<div class="sr"><span class="sl">BB</span><span class="sv">'+(p.BB||0)+'</span></div>'+
+      '<div class="sr"><span class="sl">HBP</span><span class="sv">'+(p.HBP||0)+'</span></div>'+
+      '<div class="sr"><span class="sl">K</span><span class="sv">'+(p.SO||0)+'</span></div>'+
+      '<div class="sr"><span class="sl">SB</span><span class="sv">'+(p.SB||0)+'</span></div>'+
+      '<div class="sr"><span class="sl">R</span><span class="sv">'+(p.R||0)+'</span></div>'+
+      '<div class="sr"><span class="sl">Hit Rating</span><span class="sv" style="color:var(--gold)">'+(p.gpt_hit_score!=null?parseFloat(p.gpt_hit_score).toFixed(1):'--')+'</span></div>'+
+      '<div class="sr"><span class="sl">Hit Rank</span><span class="sv" style="color:var(--gold)">'+(p.off_rank||'--')+'</span></div>'+
+      '</div>';
+  }
+  let pitSec='';
+  if(hasPit){
+    const perIP=p.pit_per_ip!=null?p.pit_per_ip.toFixed(1):'--';
+    pitSec='<div class="sec">Pitching</div><div class="stat-grid">'+
+      '<div class="sr"><span class="sl">IP</span><span class="sv">'+ipS+'</span></div>'+
+      '<div class="sr"><span class="sl">Pitches</span><span class="sv">'+(p.pit_pitches||'--')+'</span></div>'+
+      '<div class="sr"><span class="sl">P/IP</span><span class="sv" style="color:'+(p.pit_per_ip!=null&&p.pit_per_ip<14?'var(--lo)':'inherit')+'">'+perIP+'</span></div>'+
+      '<div class="sr"><span class="sl">Strikes</span><span class="sv">'+(p.pit_strikes||'--')+'</span></div>'+
+      '<div class="sr"><span class="sl">Strike%</span><span class="sv" style="color:'+(p.STR_PCT!=null&&p.STR_PCT>=55?'var(--hi)':p.STR_PCT!=null&&p.STR_PCT<45?'var(--lo)':'inherit')+'">'+sp+'</span></div>'+
+      '<div class="sr"><span class="sl">K</span><span class="sv">'+(p.pit_SO||0)+'</span></div>'+
+      '<div class="sr"><span class="sl">K/6</span><span class="sv">'+fc(p.K6,10,7,1)+'</span></div>'+
+      '<div class="sr"><span class="sl">BB</span><span class="sv">'+(p.pit_BB||0)+'</span></div>'+
+      '<div class="sr"><span class="sl">BB/6</span><span class="sv">'+fc(p.BB6,6,9,1,true)+'</span></div>'+
+      '<div class="sr"><span class="sl">H/6</span><span class="sv">'+(p.H6!=null?parseFloat(p.H6).toFixed(1):'--')+'</span></div>'+
+      '<div class="sr"><span class="sl">HBP</span><span class="sv">'+(p.pit_HBP||0)+'</span></div>'+
+      '<div class="sr"><span class="sl">ERA/6</span><span class="sv">'+(p.ERA?parseFloat(p.ERA).toFixed(2):'--')+'</span></div>'+
+      '<div class="sr"><span class="sl">WHIP</span><span class="sv">'+(p.WHIP?parseFloat(p.WHIP).toFixed(2):'--')+'</span></div>'+
+      '<div class="sr"><span class="sl">Pit Rating</span><span class="sv" style="color:var(--gold)">'+(p.gpt_pit_score!=null?parseFloat(p.gpt_pit_score).toFixed(1):'--')+'</span></div>'+
+      '<div class="sr"><span class="sl">Pit Rank</span><span class="sv" style="color:var(--gold)">'+(p.pit_rank||'--')+'</span></div>'+
+      '</div>';
+  } else if(o>0){
+    const spSmall=p.STR_PCT!=null?(parseFloat(p.STR_PCT).toFixed(1)+'%'):'--';
+    const perIPSmall=p.pit_per_ip!=null?p.pit_per_ip.toFixed(1):'--';
+    pitSec='<div style="color:var(--muted);font-size:12px;margin:8px 0">'+ipS+' IP (min 3.0 for ranking)</div>'+
+      (p.pit_pitches>0?
+        '<div class="stat-grid" style="margin-top:4px">'+
+        '<div class="sr"><span class="sl">Pitches</span><span class="sv">'+(p.pit_pitches||0)+'</span></div>'+
+        '<div class="sr"><span class="sl">P/IP</span><span class="sv">'+perIPSmall+'</span></div>'+
+        '<div class="sr"><span class="sl">Strikes</span><span class="sv">'+(p.pit_strikes||0)+'</span></div>'+
+        '<div class="sr"><span class="sl">Strike%</span><span class="sv">'+spSmall+'</span></div>'+
+        '</div>':'');
+  }
+  document.getElementById('modal-content').innerHTML=
+    '<div class="modal-name">'+p.name+'</div>'+
+    '<div class="modal-team">'+pill(p.team)+asBadge+'</div>'+
+    '<div class="modal-ranks">'+
+      '<div class="rc"><div class="rc-l">Overall</div><div class="rc-v">'+(p.ovr_rank||'--')+'</div></div>'+
+      '<div class="rc"><div class="rc-l">Score</div><div class="rc-v">'+(p.ovr_score||'--')+'</div></div>'+
+      '<div class="rc"><div class="rc-l">Hitting</div><div class="rc-v">'+(p.off_rank||'--')+'</div></div>'+
+      '<div class="rc"><div class="rc-l">Pitching</div><div class="rc-v">'+(p.pit_rank||'--')+'</div></div>'+
+    '</div>'+hitSec+pitSec;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+    </script>
+</body>
+</html>
