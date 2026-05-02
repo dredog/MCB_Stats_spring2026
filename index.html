@@ -48,10 +48,10 @@
   main {
     width: 100%;
     max-width: 860px;
-    padding: 48px 24px 64px;
+    padding: 28px 24px 48px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
   }
 
   .section-label {
@@ -68,10 +68,10 @@
     background: #161b26;
     border: 1px solid #252c3d;
     border-radius: 8px;
-    padding: 24px 28px;
+    padding: 12px 20px;
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 10px;
     cursor: pointer;
     text-decoration: none;
     transition: border-color .15s, background .15s;
@@ -83,8 +83,8 @@
   }
 
   .card-icon {
-    width: 52px;
-    height: 52px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -168,7 +168,8 @@
 </header>
 
 <main>
-  <div class="section-label">Select a league</div>
+  <p style="font-size:13px;color:#7a7e8a;margin-bottom:4px">Select a league to view stats and player ratings.</p>
+  <div class="section-label">Spring 2026</div>
 
   <a class="card aa-card" href="MCB_Spr26_AA_stats_ratings.html">
     <div class="card-icon aa-icon">AA</div>
@@ -206,10 +207,23 @@
     <div class="card-arrow">›</div>
   </a>
 
+  <div style="margin: 12px 0 4px; border-top: 1px solid #252c3d; padding-top: 20px;">
+    <div class="section-label">Fall 2025</div>
+  </div>
+
+  <a class="card aa-card" href="gc_fall2025_league_tool.html">
+    <div class="card-icon aa-icon">AA</div>
+    <div class="card-body">
+      <div class="card-title">MCB Double-A League <span class="tag tag-aa">9U</span></div>
+      <div class="card-desc">11 teams &nbsp;·&nbsp; Hitting, pitching &amp; overall ratings &nbsp;·&nbsp; Fall 2025 season</div>
+    </div>
+    <div class="card-arrow">›</div>
+  </a>
+
 </main>
 
 <footer>
-  MCB &amp; DHYS Spring 2026 &nbsp;·&nbsp; Stats scraped from GameChanger &nbsp;·&nbsp; Not affiliated with MCB, DHYS, or GameChanger
+  MCB &amp; DHYS Spring 2026 &nbsp;·&nbsp; MCB Fall 2025 &nbsp;·&nbsp; Stats scraped from GameChanger &nbsp;·&nbsp; Not affiliated with MCB, DHYS, or GameChanger
 </footer>
 
 </body>
