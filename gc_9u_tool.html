@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCB 9U Summer 2026 Stats</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0e14;--surface:#161b26;--border:#252c3d;--border2:#1e2535;
+  --text:#e8eaf0;--muted:#7a7e8a;--gold:#f5c518;--accent:#4a78c4;
+  --green:#4caf50;--red:#e53935;--radius:6px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Source Sans 3',sans-serif;min-height:100vh}
+header{background:#11151e;border-bottom:2px solid var(--gold);padding:16px 24px 12px}
+.hdr-title{font-family:Oswald,sans-serif;font-size:26px;font-weight:700;color:var(--gold);letter-spacing:.06em;text-transform:uppercase}
+.hdr-sub{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 24px;background:#13172080;border-bottom:1px solid var(--border)}
+.tab-btn{font-family:Oswald,sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 16px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.tab-btn.active,.tab-btn:hover{background:var(--gold);color:#000;border-color:var(--gold)}
+.sep{width:1px;height:24px;background:var(--border);margin:0 4px}
+.filter-label{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.pos-btn{font-family:Oswald,sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;padding:5px 11px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.pos-btn.active{background:#1a2a3a;color:var(--accent);border-color:var(--accent)}
+.pos-btn:hover:not(.active){border-color:var(--muted);color:var(--text)}
+.team-btn{font-size:12px;font-family:Oswald,sans-serif;font-weight:600;padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.team-btn.active{color:#fff}
+main{padding:16px 24px 48px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:700px}
+thead th{font-family:Oswald,sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:first-child,thead th:nth-child(2){text-align:left}
+thead th:hover{color:var(--text)}
+thead th.sort-asc::after{content:' ↑';color:var(--gold)}
+thead th.sort-desc::after{content:' ↓';color:var(--gold)}
+tbody tr{border-bottom:1px solid var(--border2);transition:background .1s}
+tbody tr:hover{background:#1c2235}
+td{padding:7px 10px;text-align:right;white-space:nowrap;color:var(--text)}
+td:first-child,td:nth-child(2){text-align:left}
+.player-name{font-weight:600}
+.team-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.team-cell{display:flex;align-items:center}
+.score-cell{font-family:Oswald,sans-serif;font-weight:600;font-size:14px}
+.score-hi{color:#4caf50}.score-mid{color:var(--gold)}.score-lo{color:var(--muted)}
+.score-none{color:#3a4460;font-size:11px}
+.pos-tag{display:inline-block;font-size:10px;font-family:Oswald,sans-serif;font-weight:600;letter-spacing:.06em;padding:1px 5px;border-radius:3px;background:#1a2235;color:var(--muted);border:1px solid var(--border);margin-right:3px;margin-bottom:2px}
+.note{font-size:11px;color:var(--muted);padding:8px 0 4px;letter-spacing:.04em}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.empty-msg{text-align:center;padding:48px;color:var(--muted);font-family:Oswald,sans-serif;font-size:14px}
+footer{text-align:center;font-size:11px;color:var(--muted);padding:16px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr-title">MCB 9U Summer 2026 &middot; Tournament Stats</div>
+  <div class="hdr-sub">Hitting &middot; Pitching &middot; Fielding &nbsp;&middot;&nbsp; Scraped May 25 2026 11:07</div>
+</header>
+
+<div class="controls" id="main-controls">
+  <button class="tab-btn active" onclick="showTab('ratings',event)">Overall Ratings</button>
+  <button class="tab-btn" onclick="showTab('hitting',event)">Hitting</button>
+  <button class="tab-btn" onclick="showTab('pitching',event)">Pitching</button>
+  <button class="tab-btn" onclick="showTab('fielding',event)">Fielding</button>
+  <button class="tab-btn" onclick="showTab('games',event)">Games</button>
+  <button class="tab-btn" onclick="showTab('opponents',event)">Opponents</button>
+  <div class="sep"></div>
+  <span class="filter-label">Team:</span>
+  <div id="team-filter" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+</div>
+<div class="controls" id="pos-controls" style="display:none">
+  <span class="filter-label">Position:</span>
+  <button class="pos-btn active" onclick="filterPos('ALL')">All</button>
+  <button class="pos-btn" onclick="filterPos('SS')">SS</button>
+  <button class="pos-btn" onclick="filterPos('2B')">2B</button>
+  <button class="pos-btn" onclick="filterPos('3B')">3B</button>
+  <button class="pos-btn" onclick="filterPos('1B')">1B</button>
+  <button class="pos-btn" onclick="filterPos('C')">C</button>
+  <button class="pos-btn" onclick="filterPos('P')">P</button>
+  <button class="pos-btn" onclick="filterPos('LF')">LF</button>
+  <button class="pos-btn" onclick="filterPos('CF')">CF</button>
+  <button class="pos-btn" onclick="filterPos('RF')">RF</button>
+</div>
+
+<main>
+  <div class="tab-pane active" id="tab-ratings">
+    <div class="note">OVR = 55% hitting + 30% pitching + 15% fielding (degrades gracefully when fewer qualify) &nbsp;&middot;&nbsp; min PA=4 / min outs=1 / min chances=1</div>
+    <table id="ratings-table"><thead><tr>
+      <th onclick="sortTable('ratings-table',0)">Player</th>
+      <th onclick="sortTable('ratings-table',1)">Team</th>
+      <th onclick="sortTable('ratings-table',2)">G</th>
+      <th onclick="sortTable('ratings-table',3)">AB</th>
+      <th onclick="sortTable('ratings-table',4)">AVG</th>
+      <th onclick="sortTable('ratings-table',5)">SLG</th>
+      <th onclick="sortTable('ratings-table',6)">R</th>
+      <th onclick="sortTable('ratings-table',7)">RBI</th>
+      <th onclick="sortTable('ratings-table',8)">IP</th>
+      <th onclick="sortTable('ratings-table',9)">TC</th>
+      <th onclick="sortTable('ratings-table',10)">HitScore</th>
+      <th onclick="sortTable('ratings-table',11)">PitScore</th>
+      <th onclick="sortTable('ratings-table',12)">FldScore</th>
+      <th onclick="sortTable('ratings-table',13)">OVR</th>
+    </tr></thead><tbody id="ratings-body"></tbody></table>
+  </div>
+
+  <div class="tab-pane" id="tab-hitting">
+    <table id="hitting-table"><thead><tr>
+      <th onclick="sortTable('hitting-table',0)">Player</th>
+      <th onclick="sortTable('hitting-table',1)">Team</th>
+      <th onclick="sortTable('hitting-table',2)">G</th>
+      <th onclick="sortTable('hitting-table',3)">AB</th>
+      <th onclick="sortTable('hitting-table',4)">H</th>
+      <th onclick="sortTable('hitting-table',5)">2B</th>
+      <th onclick="sortTable('hitting-table',6)">3B</th>
+      <th onclick="sortTable('hitting-table',7)">HR</th>
+      <th onclick="sortTable('hitting-table',8)">R</th>
+      <th onclick="sortTable('hitting-table',9)">RBI</th>
+      <th onclick="sortTable('hitting-table',10)">BB</th>
+      <th onclick="sortTable('hitting-table',11)">SB</th>
+      <th onclick="sortTable('hitting-table',12)">SO</th>
+      <th onclick="sortTable('hitting-table',13)">AVG</th>
+      <th onclick="sortTable('hitting-table',14)">OBP</th>
+      <th onclick="sortTable('hitting-table',15)">SLG</th>
+      <th onclick="sortTable('hitting-table',16)">OPS</th>
+      <th onclick="sortTable('hitting-table',17)">HitScore</th>
+    </tr></thead><tbody id="hitting-body"></tbody></table>
+  </div>
+
+  <div class="tab-pane" id="tab-pitching">
+    <table id="pitching-table"><thead><tr>
+      <th onclick="sortTable('pitching-table',0)">Player</th>
+      <th onclick="sortTable('pitching-table',1)">Team</th>
+      <th onclick="sortTable('pitching-table',2)">G</th>
+      <th onclick="sortTable('pitching-table',3)">IP</th>
+      <th onclick="sortTable('pitching-table',4)">H</th>
+      <th onclick="sortTable('pitching-table',5)">ER</th>
+      <th onclick="sortTable('pitching-table',6)">BB</th>
+      <th onclick="sortTable('pitching-table',7)">SO</th>
+      <th onclick="sortTable('pitching-table',8)">ERA</th>
+      <th onclick="sortTable('pitching-table',9)">WHIP</th>
+      <th onclick="sortTable('pitching-table',10)">K/6</th>
+      <th onclick="sortTable('pitching-table',11)">BB/6</th>
+      <th onclick="sortTable('pitching-table',12)">STR%</th>
+      <th onclick="sortTable('pitching-table',13)">PitScore</th>
+    </tr></thead><tbody id="pitching-body"></tbody></table>
+  </div>
+
+  <div class="tab-pane" id="tab-fielding">
+    <div class="note">Weighted by position difficulty &nbsp;&middot;&nbsp; SS assist = 4.0 pts &middot; OF putout = 3.0-3.5 pts &middot; 1B putout = 1.0 pt &middot; Errors = -0.5 pts &nbsp;&middot;&nbsp; *Inn = innings where player recorded a play at that position</div>
+    <table id="fielding-table"><thead><tr>
+      <th onclick="sortTable('fielding-table',0)">Player</th>
+      <th onclick="sortTable('fielding-table',1)">Team</th>
+      <th onclick="sortTable('fielding-table',2)">Positions</th>
+      <th onclick="sortTable('fielding-table',3)">PO</th>
+      <th onclick="sortTable('fielding-table',4)">A</th>
+      <th onclick="sortTable('fielding-table',5)">E</th>
+      <th onclick="sortTable('fielding-table',6)">TC</th>
+      <th onclick="sortTable('fielding-table',7)">Inn*</th>
+      <th onclick="sortTable('fielding-table',8)">FLD%</th>
+      <th onclick="sortTable('fielding-table',9)">FldScore</th>
+    </tr></thead><tbody id="fielding-body"></tbody></table>
+  </div>
+  <div class="tab-pane" id="tab-games">
+    <div class="note">All completed games &nbsp;&middot;&nbsp; Click a game link to view on GameChanger</div>
+    <table id="games-table"><thead><tr>
+      <th onclick="sortTable('games-table',0)">Date</th>
+      <th onclick="sortTable('games-table',1)">Team</th>
+      <th onclick="sortTable('games-table',2)">Opponent</th>
+      <th onclick="sortTable('games-table',3)" style="text-align:center">Result</th>
+      <th onclick="sortTable('games-table',4)">Score</th>
+      <th>GC Link</th>
+    </tr></thead><tbody id="games-body"></tbody></table>
+  </div>
+
+  <div class="tab-pane" id="tab-opponents">
+    <div class="note">Opponents faced by multiple MCB 9U teams &nbsp;&middot;&nbsp; Shows cross-team comparison</div>
+    <div id="opponents-container"></div>
+  </div>
+
+</main>
+
+<footer>MCB 9U Summer 2026 &middot; Stats scraped from GameChanger &middot; Not affiliated with MCB or GameChanger</footer>
+
+<script>
+const PLAYERS=[{"name": "Wyatt W", "team_key": "WHITE_SOX", "team_name": "MCB White Sox 9U", "G": 1, "AB": 2, "H": 1, "BB": 2, "HBP": 0, "SO": 0, "SB": 0, "R": 1, "RBI": 2, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 4, "AVG": 0.5, "SLG": 0.5, "OBP": 0.75, "OPS": 1.25, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": 39.38, "pit_score": null, "field_score": null, "ovr_score": 37.41, "allstar": null}, {"name": "Tatum C", "team_key": "WHITE_SOX", "team_name": "MCB White Sox 9U", "G": 1, "AB": 2, "H": 1, "BB": 2, "HBP": 0, "SO": 0, "SB": 0, "R": 1, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 4, "AVG": 0.5, "SLG": 0.5, "OBP": 0.75, "OPS": 1.25, "pit_G": 1, "outs": 3, "IP": "1.0", "ERA": 18.0, "K6": 0.0, "BB6": 6.0, "H6": 18.0, "WHIP": 4.0, "STR_PCT": null, "pit_SO": 0, "pit_BB": 1, "pit_H": 3, "pit_ER": 3, "pit_pitches": 0, "pit_strikes": 0, "PO": 2, "A": 0, "E": 0, "chances": 2, "fld_pct": 1.0, "by_pos": {"P": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 1, "fld_pct": 1.0, "score": 27.0}}, "hit_score": 39.38, "pit_score": 5.5, "field_score": 27.0, "ovr_score": 27.36, "allstar": null}, {"name": "Robert Y", "team_key": "WHITE_SOX", "team_name": "MCB White Sox 9U", "G": 1, "AB": 4, "H": 1, "BB": 0, "HBP": 0, "SO": 1, "SB": 0, "R": 0, "RBI": 2, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 4, "AVG": 0.25, "SLG": 0.25, "OBP": 0.25, "OPS": 0.5, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": 10.0, "pit_score": null, "field_score": null, "ovr_score": 9.5, "allstar": null}, {"name": "Jackson M", "team_key": "WHITE_SOX", "team_name": "MCB White Sox 9U", "G": 1, "AB": 1, "H": 1, "BB": 2, "HBP": 0, "SO": 0, "SB": 0, "R": 2, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 3, "AVG": 1.0, "SLG": 1.0, "OBP": 1.0, "OPS": 2.0, "pit_G": 1, "outs": 3, "IP": "1.0", "ERA": 18.0, "K6": 6.0, "BB6": 6.0, "H6": 24.0, "WHIP": 5.0, "STR_PCT": null, "pit_SO": 1, "pit_BB": 1, "pit_H": 4, "pit_ER": 3, "pit_pitches": 0, "pit_strikes": 0, "PO": 2, "A": 0, "E": 0, "chances": 2, "fld_pct": 1.0, "by_pos": {"P": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 1, "fld_pct": 1.0, "score": 27.0}}, "hit_score": null, "pit_score": 12.5, "field_score": 27.0, "ovr_score": 6.25, "allstar": null}, {"name": "William J", "team_key": "WHITE_SOX", "team_name": "MCB White Sox 9U", "G": 1, "AB": 1, "H": 0, "BB": 2, "HBP": 0, "SO": 1, "SB": 0, "R": 1, "RBI": 0, "2B": 0, "3B": 0, "HR": 0, "TB": 0, "PA": 3, "AVG": 0.0, "SLG": 0.0, "OBP": 0.667, "OPS": 0.667, "pit_G": 1, "outs": 3, "IP": "1.0", "ERA": 18.0, "K6": 6.0, "BB6": 18.0, "H6": 12.0, "WHIP": 5.0, "STR_PCT": null, "pit_SO": 1, "pit_BB": 3, "pit_H": 2, "pit_ER": 3, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": null, "pit_score": 7.0, "field_score": null, "ovr_score": 3.5, "allstar": null}, {"name": "Charlie R", "team_key": "WHITE_SOX", "team_name": "MCB White Sox 9U", "G": 1, "AB": 3, "H": 0, "BB": 0, "HBP": 0, "SO": 0, "SB": 0, "R": 0, "RBI": 0, "2B": 0, "3B": 0, "HR": 0, "TB": 0, "PA": 3, "AVG": 0.0, "SLG": 0.0, "OBP": 0.0, "OPS": 0.0, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": null, "pit_score": null, "field_score": null, "ovr_score": null, "allstar": null}, {"name": "Wright W", "team_key": "WHITE_SOX", "team_name": "MCB White Sox 9U", "G": 1, "AB": 2, "H": 1, "BB": 1, "HBP": 0, "SO": 1, "SB": 0, "R": 1, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 3, "AVG": 0.5, "SLG": 0.5, "OBP": 0.667, "OPS": 1.167, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": null, "pit_score": null, "field_score": null, "ovr_score": null, "allstar": null}, {"name": "Nolan Y", "team_key": "WHITE_SOX", "team_name": "MCB White Sox 9U", "G": 1, "AB": 1, "H": 1, "BB": 2, "HBP": 0, "SO": 0, "SB": 0, "R": 1, "RBI": 0, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 3, "AVG": 1.0, "SLG": 1.0, "OBP": 1.0, "OPS": 2.0, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": null, "pit_score": null, "field_score": null, "ovr_score": null, "allstar": null}, {"name": "Sloan R", "team_key": "WHITE_SOX", "team_name": "MCB White Sox 9U", "G": 1, "AB": 2, "H": 1, "BB": 1, "HBP": 0, "SO": 0, "SB": 0, "R": 2, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 3, "AVG": 0.5, "SLG": 0.5, "OBP": 0.667, "OPS": 1.167, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": null, "pit_score": null, "field_score": null, "ovr_score": null, "allstar": null}, {"name": "William K", "team_key": "WHITE_SOX", "team_name": "MCB White Sox 9U", "G": 1, "AB": 2, "H": 1, "BB": 1, "HBP": 0, "SO": 0, "SB": 0, "R": 2, "RBI": 0, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 3, "AVG": 0.5, "SLG": 0.5, "OBP": 0.667, "OPS": 1.167, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": null, "pit_score": null, "field_score": null, "ovr_score": null, "allstar": null}, {"name": "Jack C", "team_key": "BLUE_SOX", "team_name": "MCB Blue Sox 9U", "G": 2, "AB": 4, "H": 3, "BB": 2, "HBP": 0, "SO": 1, "SB": 0, "R": 3, "RBI": 1, "2B": 1, "3B": 0, "HR": 0, "TB": 4, "PA": 6, "AVG": 0.75, "SLG": 1.0, "OBP": 0.833, "OPS": 1.833, "pit_G": 1, "outs": 3, "IP": "1.0", "ERA": 6.0, "K6": 6.0, "BB6": 6.0, "H6": 0.0, "WHIP": 1.0, "STR_PCT": null, "pit_SO": 1, "pit_BB": 1, "pit_H": 0, "pit_ER": 1, "pit_pitches": 0, "pit_strikes": 0, "PO": 2, "A": 1, "E": 1, "chances": 4, "fld_pct": 0.75, "by_pos": {"CF": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 1, "fld_pct": 1.0, "score": 63.0}, "P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 34.2}, "2B": {"PO": 0, "A": 0, "E": 1, "chances": 1, "innings": 1, "fld_pct": 0.0, "score": 0.0}}, "hit_score": 53.45, "pit_score": 28.9, "field_score": 53.5, "ovr_score": 46.09, "allstar": null}, {"name": "Abel W", "team_key": "BLUE_SOX", "team_name": "MCB Blue Sox 9U", "G": 2, "AB": 5, "H": 3, "BB": 1, "HBP": 0, "SO": 0, "SB": 0, "R": 1, "RBI": 2, "2B": 0, "3B": 0, "HR": 0, "TB": 3, "PA": 6, "AVG": 0.6, "SLG": 0.6, "OBP": 0.667, "OPS": 1.267, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 5, "A": 0, "E": 3, "chances": 8, "fld_pct": 0.625, "by_pos": {"SS": {"PO": 3, "A": 0, "E": 3, "chances": 6, "innings": 5, "fld_pct": 0.5, "score": 26.9}, "2B": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 1, "fld_pct": 1.0, "score": 45.0}}, "hit_score": 38.95, "pit_score": null, "field_score": 51.6, "ovr_score": 41.48, "allstar": null}, {"name": "Knox N", "team_key": "BLUE_SOX", "team_name": "MCB Blue Sox 9U", "G": 2, "AB": 6, "H": 3, "BB": 0, "HBP": 0, "SO": 1, "SB": 0, "R": 2, "RBI": 2, "2B": 1, "3B": 0, "HR": 1, "TB": 7, "PA": 6, "AVG": 0.5, "SLG": 1.167, "OBP": 0.5, "OPS": 1.667, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 6, "A": 0, "E": 0, "chances": 6, "fld_pct": 1.0, "by_pos": {"C": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 34.2}, "1B": {"PO": 4, "A": 0, "E": 0, "chances": 4, "innings": 3, "fld_pct": 1.0, "score": 19.8}, "LF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 51.4}}, "hit_score": 43.61, "pit_score": null, "field_score": 32.2, "ovr_score": 41.33, "allstar": null}, {"name": "Anderson M", "team_key": "BLUE_SOX", "team_name": "MCB Blue Sox 9U", "G": 2, "AB": 5, "H": 4, "BB": 1, "HBP": 0, "SO": 0, "SB": 0, "R": 3, "RBI": 3, "2B": 1, "3B": 0, "HR": 0, "TB": 5, "PA": 6, "AVG": 0.8, "SLG": 1.0, "OBP": 0.833, "OPS": 1.833, "pit_G": 1, "outs": 2, "IP": "0.2", "ERA": 0.0, "K6": 0.0, "BB6": 9.0, "H6": 9.0, "WHIP": 3.0, "STR_PCT": null, "pit_SO": 0, "pit_BB": 1, "pit_H": 1, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 3, "A": 2, "E": 2, "chances": 7, "fld_pct": 0.714, "by_pos": {"2B": {"PO": 1, "A": 1, "E": 1, "chances": 3, "innings": 2, "fld_pct": 0.667, "score": 28.3}, "P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 34.2}, "CF": {"PO": 0, "A": 0, "E": 1, "chances": 1, "innings": 1, "fld_pct": 0.0, "score": 0.0}, "1B": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 18.0}}, "hit_score": 55.46, "pit_score": 11.4, "field_score": 33.0, "ovr_score": 38.87, "allstar": null}, {"name": "Ethan M", "team_key": "BLUE_SOX", "team_name": "MCB Blue Sox 9U", "G": 2, "AB": 4, "H": 2, "BB": 1, "HBP": 0, "SO": 0, "SB": 0, "R": 2, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 2, "PA": 5, "AVG": 0.5, "SLG": 0.5, "OBP": 0.6, "OPS": 1.1, "pit_G": 2, "outs": 9, "IP": "3.0", "ERA": 12.0, "K6": 8.0, "BB6": 12.0, "H6": 4.0, "WHIP": 2.67, "STR_PCT": null, "pit_SO": 4, "pit_BB": 6, "pit_H": 2, "pit_ER": 6, "pit_pitches": 0, "pit_strikes": 0, "PO": 2, "A": 0, "E": 1, "chances": 3, "fld_pct": 0.667, "by_pos": {"RF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 51.4}, "3B": {"PO": 1, "A": 0, "E": 1, "chances": 2, "innings": 1, "fld_pct": 0.5, "score": 18.0}}, "hit_score": 33.64, "pit_score": 20.3, "field_score": 45.0, "ovr_score": 31.34, "allstar": null}, {"name": "Remy W", "team_key": "BLUE_SOX", "team_name": "MCB Blue Sox 9U", "G": 2, "AB": 5, "H": 2, "BB": 0, "HBP": 0, "SO": 0, "SB": 0, "R": 3, "RBI": 2, "2B": 0, "3B": 0, "HR": 0, "TB": 2, "PA": 5, "AVG": 0.4, "SLG": 0.4, "OBP": 0.4, "OPS": 0.8, "pit_G": 1, "outs": 2, "IP": "0.2", "ERA": 18.0, "K6": 9.0, "BB6": 9.0, "H6": 27.0, "WHIP": 6.0, "STR_PCT": null, "pit_SO": 1, "pit_BB": 1, "pit_H": 3, "pit_ER": 2, "pit_pitches": 0, "pit_strikes": 0, "PO": 1, "A": 0, "E": 0, "chances": 1, "fld_pct": 1.0, "by_pos": {"P": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 25.7}}, "hit_score": 23.69, "pit_score": 13.1, "field_score": 25.7, "ovr_score": 20.81, "allstar": null}, {"name": "Hank H", "team_key": "BLUE_SOX", "team_name": "MCB Blue Sox 9U", "G": 2, "AB": 6, "H": 1, "BB": 0, "HBP": 0, "SO": 1, "SB": 0, "R": 0, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 6, "AVG": 0.167, "SLG": 0.167, "OBP": 0.167, "OPS": 0.334, "pit_G": 1, "outs": 1, "IP": "0.1", "ERA": 36.0, "K6": 0.0, "BB6": 36.0, "H6": 36.0, "WHIP": 12.0, "STR_PCT": null, "pit_SO": 0, "pit_BB": 2, "pit_H": 2, "pit_ER": 2, "pit_pitches": 0, "pit_strikes": 0, "PO": 1, "A": 0, "E": 0, "chances": 1, "fld_pct": 1.0, "by_pos": {"CF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 59.9}}, "hit_score": 6.77, "pit_score": 0.0, "field_score": 59.9, "ovr_score": 12.71, "allstar": null}, {"name": "Mason M", "team_key": "BLUE_SOX", "team_name": "MCB Blue Sox 9U", "G": 2, "AB": 3, "H": 0, "BB": 1, "HBP": 0, "SO": 1, "SB": 0, "R": 1, "RBI": 0, "2B": 0, "3B": 0, "HR": 0, "TB": 0, "PA": 4, "AVG": 0.0, "SLG": 0.0, "OBP": 0.25, "OPS": 0.25, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 3, "E": 1, "chances": 4, "fld_pct": 0.75, "by_pos": {"2B": {"PO": 0, "A": 2, "E": 1, "chances": 3, "innings": 3, "fld_pct": 0.667, "score": 28.3}, "P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 34.2}}, "hit_score": 2.19, "pit_score": null, "field_score": 40.9, "ovr_score": 9.93, "allstar": null}, {"name": "Logan J", "team_key": "BLUE_SOX", "team_name": "MCB Blue Sox 9U", "G": 2, "AB": 4, "H": 1, "BB": 1, "HBP": 0, "SO": 2, "SB": 0, "R": 1, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 5, "AVG": 0.25, "SLG": 0.25, "OBP": 0.4, "OPS": 0.65, "pit_G": 1, "outs": 2, "IP": "0.2", "ERA": 45.0, "K6": 0.0, "BB6": 27.0, "H6": 18.0, "WHIP": 7.5, "STR_PCT": null, "pit_SO": 0, "pit_BB": 3, "pit_H": 2, "pit_ER": 5, "pit_pitches": 0, "pit_strikes": 0, "PO": 4, "A": 0, "E": 0, "chances": 4, "fld_pct": 1.0, "by_pos": {"1B": {"PO": 4, "A": 0, "E": 0, "chances": 4, "innings": 3, "fld_pct": 1.0, "score": 19.8}}, "hit_score": 12.03, "pit_score": 0.0, "field_score": 19.8, "ovr_score": 9.59, "allstar": null}, {"name": "Austin L", "team_key": "BLUE_SOX", "team_name": "MCB Blue Sox 9U", "G": 2, "AB": 4, "H": 0, "BB": 1, "HBP": 0, "SO": 1, "SB": 0, "R": 1, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 0, "PA": 5, "AVG": 0.0, "SLG": 0.0, "OBP": 0.2, "OPS": 0.2, "pit_G": 1, "outs": 1, "IP": "0.1", "ERA": 18.0, "K6": 0.0, "BB6": 36.0, "H6": 18.0, "WHIP": 9.0, "STR_PCT": null, "pit_SO": 0, "pit_BB": 2, "pit_H": 1, "pit_ER": 1, "pit_pitches": 0, "pit_strikes": 0, "PO": 1, "A": 0, "E": 3, "chances": 4, "fld_pct": 0.25, "by_pos": {"3B": {"PO": 1, "A": 0, "E": 3, "chances": 4, "innings": 4, "fld_pct": 0.25, "score": 4.9}}, "hit_score": 1.76, "pit_score": 0.0, "field_score": 17.1, "ovr_score": 3.53, "allstar": null}, {"name": "Cooper G", "team_key": "GOLD_SOX", "team_name": "MCB Gold Sox 9U", "G": 3, "AB": 6, "H": 4, "BB": 2, "HBP": 0, "SO": 1, "SB": 0, "R": 5, "RBI": 3, "2B": 1, "3B": 0, "HR": 1, "TB": 8, "PA": 8, "AVG": 0.667, "SLG": 1.333, "OBP": 0.75, "OPS": 2.083, "pit_G": 2, "outs": 8, "IP": "2.2", "ERA": 20.25, "K6": 4.5, "BB6": 13.5, "H6": 11.2, "WHIP": 4.12, "STR_PCT": null, "pit_SO": 2, "pit_BB": 6, "pit_H": 5, "pit_ER": 9, "pit_pitches": 0, "pit_strikes": 0, "PO": 6, "A": 2, "E": 0, "chances": 8, "fld_pct": 1.0, "by_pos": {"3B": {"PO": 1, "A": 1, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 54.0}, "LF": {"PO": 3, "A": 0, "E": 0, "chances": 3, "innings": 2, "fld_pct": 1.0, "score": 56.6}, "C": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 1, "fld_pct": 1.0, "score": 36.0}, "P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 34.2}}, "hit_score": 59.73, "pit_score": 6.4, "field_score": 61.0, "ovr_score": 43.92, "allstar": null}, {"name": "Wilton G", "team_key": "GOLD_SOX", "team_name": "MCB Gold Sox 9U", "G": 2, "AB": 3, "H": 2, "BB": 1, "HBP": 0, "SO": 1, "SB": 0, "R": 0, "RBI": 0, "2B": 0, "3B": 0, "HR": 0, "TB": 2, "PA": 4, "AVG": 0.667, "SLG": 0.667, "OBP": 0.75, "OPS": 1.417, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 1, "A": 0, "E": 0, "chances": 1, "fld_pct": 1.0, "by_pos": {"SS": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 51.4}}, "hit_score": 38.85, "pit_score": null, "field_score": 51.4, "ovr_score": 41.36, "allstar": null}, {"name": "Clyde H", "team_key": "GOLD_SOX", "team_name": "MCB Gold Sox 9U", "G": 3, "AB": 6, "H": 3, "BB": 1, "HBP": 0, "SO": 1, "SB": 0, "R": 1, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 3, "PA": 7, "AVG": 0.5, "SLG": 0.5, "OBP": 0.571, "OPS": 1.071, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 5, "A": 5, "E": 0, "chances": 10, "fld_pct": 1.0, "by_pos": {"2B": {"PO": 3, "A": 0, "E": 0, "chances": 3, "innings": 2, "fld_pct": 1.0, "score": 47.2}, "P": {"PO": 2, "A": 5, "E": 0, "chances": 7, "innings": 4, "fld_pct": 1.0, "score": 41.6}}, "hit_score": 30.27, "pit_score": null, "field_score": 51.2, "ovr_score": 34.46, "allstar": null}, {"name": "Meyer L", "team_key": "GOLD_SOX", "team_name": "MCB Gold Sox 9U", "G": 3, "AB": 5, "H": 2, "BB": 2, "HBP": 0, "SO": 1, "SB": 0, "R": 0, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 2, "PA": 7, "AVG": 0.4, "SLG": 0.4, "OBP": 0.571, "OPS": 0.971, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 2, "E": 0, "chances": 2, "fld_pct": 1.0, "by_pos": {"2B": {"PO": 0, "A": 2, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 45.0}}, "hit_score": 27.62, "pit_score": null, "field_score": 45.0, "ovr_score": 31.1, "allstar": null}, {"name": "Beau M", "team_key": "GOLD_SOX", "team_name": "MCB Gold Sox 9U", "G": 3, "AB": 8, "H": 4, "BB": 1, "HBP": 0, "SO": 2, "SB": 0, "R": 3, "RBI": 0, "2B": 0, "3B": 0, "HR": 0, "TB": 4, "PA": 9, "AVG": 0.5, "SLG": 0.5, "OBP": 0.556, "OPS": 1.056, "pit_G": 2, "outs": 6, "IP": "2.0", "ERA": 3.0, "K6": 6.0, "BB6": 6.0, "H6": 9.0, "WHIP": 2.5, "STR_PCT": null, "pit_SO": 2, "pit_BB": 2, "pit_H": 3, "pit_ER": 1, "pit_pitches": 0, "pit_strikes": 0, "PO": 1, "A": 2, "E": 0, "chances": 3, "fld_pct": 1.0, "by_pos": {"C": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 34.2}, "3B": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 59.9}, "2B": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 42.8}}, "hit_score": 28.54, "pit_score": 20.7, "field_score": 50.3, "ovr_score": 29.45, "allstar": null}, {"name": "Dylan W", "team_key": "GOLD_SOX", "team_name": "MCB Gold Sox 9U", "G": 3, "AB": 8, "H": 5, "BB": 1, "HBP": 0, "SO": 2, "SB": 0, "R": 2, "RBI": 1, "2B": 1, "3B": 0, "HR": 0, "TB": 6, "PA": 9, "AVG": 0.625, "SLG": 0.75, "OBP": 0.667, "OPS": 1.417, "pit_G": 2, "outs": 3, "IP": "1.0", "ERA": 24.0, "K6": 6.0, "BB6": 24.0, "H6": 12.0, "WHIP": 6.0, "STR_PCT": null, "pit_SO": 1, "pit_BB": 4, "pit_H": 2, "pit_ER": 4, "pit_pitches": 0, "pit_strikes": 0, "PO": 5, "A": 0, "E": 1, "chances": 6, "fld_pct": 0.833, "by_pos": {"1B": {"PO": 4, "A": 0, "E": 0, "chances": 4, "innings": 3, "fld_pct": 1.0, "score": 19.8}, "CF": {"PO": 1, "A": 0, "E": 1, "chances": 2, "innings": 2, "fld_pct": 0.5, "score": 27.0}}, "hit_score": 39.21, "pit_score": 7.0, "field_score": 28.9, "ovr_score": 28.0, "allstar": null}, {"name": "Braden H", "team_key": "GOLD_SOX", "team_name": "MCB Gold Sox 9U", "G": 3, "AB": 8, "H": 2, "BB": 0, "HBP": 0, "SO": 3, "SB": 0, "R": 1, "RBI": 1, "2B": 1, "3B": 0, "HR": 0, "TB": 3, "PA": 8, "AVG": 0.25, "SLG": 0.375, "OBP": 0.25, "OPS": 0.625, "pit_G": 1, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 3, "pit_H": 1, "pit_ER": 1, "pit_pitches": 0, "pit_strikes": 0, "PO": 1, "A": 5, "E": 0, "chances": 6, "fld_pct": 1.0, "by_pos": {"SS": {"PO": 0, "A": 5, "E": 0, "chances": 5, "innings": 5, "fld_pct": 1.0, "score": 82.5}, "2B": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 42.8}}, "hit_score": 11.13, "pit_score": null, "field_score": 80.6, "ovr_score": 25.02, "allstar": null}, {"name": "William A", "team_key": "GOLD_SOX", "team_name": "MCB Gold Sox 9U", "G": 3, "AB": 6, "H": 1, "BB": 2, "HBP": 0, "SO": 1, "SB": 0, "R": 1, "RBI": 2, "2B": 0, "3B": 0, "HR": 0, "TB": 1, "PA": 8, "AVG": 0.167, "SLG": 0.167, "OBP": 0.375, "OPS": 0.542, "pit_G": 1, "outs": 6, "IP": "2.0", "ERA": 12.0, "K6": 0.0, "BB6": 3.0, "H6": 15.0, "WHIP": 3.0, "STR_PCT": null, "pit_SO": 0, "pit_BB": 1, "pit_H": 5, "pit_ER": 4, "pit_pitches": 0, "pit_strikes": 0, "PO": 5, "A": 2, "E": 1, "chances": 8, "fld_pct": 0.875, "by_pos": {"RF": {"PO": 0, "A": 0, "E": 1, "chances": 1, "innings": 1, "fld_pct": 0.0, "score": 0.0}, "P": {"PO": 0, "A": 2, "E": 0, "chances": 2, "innings": 1, "fld_pct": 1.0, "score": 36.0}, "1B": {"PO": 3, "A": 0, "E": 0, "chances": 3, "innings": 1, "fld_pct": 1.0, "score": 18.9}, "C": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 36.0}}, "hit_score": 14.14, "pit_score": 9.6, "field_score": 33.6, "ovr_score": 15.7, "allstar": null}, {"name": "Nolan T", "team_key": "GOLD_SOX", "team_name": "MCB Gold Sox 9U", "G": 3, "AB": 4, "H": 0, "BB": 3, "HBP": 0, "SO": 2, "SB": 0, "R": 0, "RBI": 1, "2B": 0, "3B": 0, "HR": 0, "TB": 0, "PA": 7, "AVG": 0.0, "SLG": 0.0, "OBP": 0.429, "OPS": 0.429, "pit_G": 1, "outs": 6, "IP": "2.0", "ERA": 9.0, "K6": 3.0, "BB6": 6.0, "H6": 9.0, "WHIP": 2.5, "STR_PCT": null, "pit_SO": 1, "pit_BB": 2, "pit_H": 3, "pit_ER": 3, "pit_pitches": 0, "pit_strikes": 0, "PO": 9, "A": 1, "E": 0, "chances": 10, "fld_pct": 1.0, "by_pos": {"P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 34.2}, "1B": {"PO": 9, "A": 0, "E": 0, "chances": 9, "innings": 5, "fld_pct": 1.0, "score": 24.1}}, "hit_score": 6.58, "pit_score": 14.9, "field_score": 27.5, "ovr_score": 12.21, "allstar": null}, {"name": "Luke B", "team_key": "GOLD_SOX", "team_name": "MCB Gold Sox 9U", "G": 3, "AB": 7, "H": 1, "BB": 0, "HBP": 0, "SO": 4, "SB": 0, "R": 1, "RBI": 2, "2B": 1, "3B": 0, "HR": 0, "TB": 2, "PA": 7, "AVG": 0.143, "SLG": 0.286, "OBP": 0.143, "OPS": 0.429, "pit_G": 1, "outs": 3, "IP": "1.0", "ERA": 12.0, "K6": 0.0, "BB6": 24.0, "H6": 6.0, "WHIP": 5.0, "STR_PCT": null, "pit_SO": 0, "pit_BB": 4, "pit_H": 1, "pit_ER": 2, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 1, "E": 0, "chances": 1, "fld_pct": 1.0, "by_pos": {"P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 34.2}}, "hit_score": 1.28, "pit_score": 7.7, "field_score": 34.2, "ovr_score": 8.14, "allstar": null}];
+const TEAMS=[{"key": "WHITE_SOX", "name": "MCB White Sox 9U", "color": "#9e9e9e"}, {"key": "BLUE_SOX", "name": "MCB Blue Sox 9U", "color": "#4a78c4"}, {"key": "GOLD_SOX", "name": "MCB Gold Sox 9U", "color": "#f5c518"}, {"key": "RED_SOX", "name": "MCB Red Sox 9U", "color": "#cc3333"}];
+const GAMES=[{"team_key": "WHITE_SOX", "date": "Jun 21", "opponent": "@ SSYS Storm 9U", "score": "L 11-13", "result": "L", "url": "https://web.gc.com/teams/SBWwHNpGeIHw/schedule/schedule/7a911aaa-1b0a-40a7-9934-ec3c409113e2"}, {"team_key": "BLUE_SOX", "date": "May 23", "opponent": "@ SSYS Storm 9U", "score": "L 11-14", "result": "L", "url": "https://web.gc.com/teams/Yg0dPEuJA74b/2026-summer-mcb-blue-sox-9u/schedule/30b9bbac-350c-48d1-b2f1-42bf7a41cae2"}, {"team_key": "BLUE_SOX", "date": "May 23", "opponent": "vs. 9u Buckhead Braves 26", "score": "L 5-13", "result": "L", "url": "https://web.gc.com/teams/Yg0dPEuJA74b/2026-summer-mcb-blue-sox-9u/schedule/ecb1d794-fc74-4581-95e4-4ddc1ae901df"}, {"team_key": "BLUE_SOX", "date": "May 24", "opponent": "@ SSYS Storm 9U", "score": "L 6-12", "result": "L", "url": "https://web.gc.com/teams/Yg0dPEuJA74b/2026-summer-mcb-blue-sox-9u/schedule/90164039-0151-49da-8f98-0e3361e99853"}, {"team_key": "GOLD_SOX", "date": "May 23", "opponent": "@ Oregon Park Sharks", "score": "L 3-5", "result": "L", "url": "https://web.gc.com/teams/OAcMtL53SJGn/schedule/schedule/e23c455d-2483-47db-a8a9-1ba99e615fe4"}, {"team_key": "GOLD_SOX", "date": "May 23", "opponent": "@ 9u Buckhead Braves 26", "score": "L 7-8", "result": "L", "url": "https://web.gc.com/teams/OAcMtL53SJGn/schedule/schedule/e064c273-2acc-4190-af95-8800088b2214"}, {"team_key": "GOLD_SOX", "date": "May 24", "opponent": "vs. 9u Stingers 2026 9U", "score": "W 14-6", "result": "W", "url": "https://web.gc.com/teams/OAcMtL53SJGn/schedule/schedule/86ccc6a9-eaff-4cda-90cb-9f48a4fbda8b"}, {"team_key": "GOLD_SOX", "date": "May 24", "opponent": "@ Oregon Park Sharks", "score": "L 4-12", "result": "L", "url": "https://web.gc.com/teams/OAcMtL53SJGn/schedule/schedule/35f16140-e182-4a2a-8b2d-3297fceb929f"}];
+const RECORDS={"WHITE_SOX": {"W": 0, "L": 1, "T": 0}, "BLUE_SOX": {"W": 0, "L": 3, "T": 0}, "GOLD_SOX": {"W": 1, "L": 3, "T": 0}, "RED_SOX": {"W": 0, "L": 0, "T": 0}};
+const teamColorMap={};
+TEAMS.forEach(t=>teamColorMap[t.key]=t.color);
+
+let activeTab='ratings',activeTeam='ALL',activePos='ALL',sortState={};
+
+function buildTeamFilter(){
+  const div=document.getElementById('team-filter');
+  const allBtn=document.createElement('button');
+  allBtn.className='team-btn active';allBtn.textContent='All';
+  allBtn.onclick=()=>{activeTeam='ALL';updateTeamBtns(allBtn);render()};
+  div.appendChild(allBtn);
+  TEAMS.forEach(t=>{
+    const btn=document.createElement('button');
+    btn.className='team-btn';btn.textContent=t.name.replace('MCB ','').replace(' 9U','');
+    btn.style.borderColor=t.color;
+    btn.dataset.tk=t.key;
+    btn.onclick=()=>{activeTeam=t.key;updateTeamBtns(btn);render()};
+    div.appendChild(btn);
+  });
+}
+
+function updateTeamBtns(active){
+  document.querySelectorAll('.team-btn').forEach(b=>{b.classList.remove('active');b.style.background='';b.style.color=''});
+  active.classList.add('active');
+  if(activeTeam!=='ALL'){const c=teamColorMap[activeTeam]||'#fff';active.style.background=c+'22';active.style.color=c;}
+}
+
+function showTab(tab,e){
+  activeTab=tab;
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(e&&e.target)e.target.classList.add('active');
+  document.getElementById('pos-controls').style.display=(tab==='fielding')?'flex':'none';
+  render();
+}
+
+function filterPos(pos){
+  activePos=pos;
+  document.querySelectorAll('.pos-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');render();
+}
+
+function scoreClass(v){if(v===null||v===undefined)return'score-none';if(v>=75)return'score-hi';if(v>=45)return'score-mid';return'score-lo';}
+function fmtScore(v){if(v===null||v===undefined)return'<span class="score-none">—</span>';return`<span class="score-cell ${scoreClass(v)}">${v.toFixed(1)}</span>`;}
+function fmtAvg(v){if(!v&&v!==0)return'—';return v.toFixed(3).replace(/^0/,'');}
+function fmtVal(v,dec=2){if(v===null||v===undefined)return'—';return typeof v==='number'?v.toFixed(dec):v;}
+
+function filtered(){return PLAYERS.filter(p=>activeTeam==='ALL'||p.team_key===activeTeam);}
+
+function teamCell(p){const color=teamColorMap[p.team_key]||'#888';return`<div class="team-cell"><span class="team-dot" style="background:${color}"></span>${p.team_name.replace('MCB ','').replace(' 9U','')}</div>`;}
+function nameCell(p){return`<span class="player-name">${p.name}</span>`;}
+
+function render(){
+  if(activeTab==='ratings')renderRatings();
+  else if(activeTab==='hitting')renderHitting();
+  else if(activeTab==='pitching')renderPitching();
+  else if(activeTab==='fielding')renderFielding();
+  else if(activeTab==='games')renderGames();
+  else if(activeTab==='opponents')renderOpponents();
+}
+
+function renderRatings(){
+  const rows=filtered().filter(p=>p.ovr_score!==null&&p.ovr_score!==undefined).sort((a,b)=>(b.ovr_score||0)-(a.ovr_score||0));
+  const tbody=document.getElementById('ratings-body');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="14" class="empty-msg">No data</td></tr>';return;}
+  tbody.innerHTML=rows.map(p=>`<tr>
+    <td>${nameCell(p)}</td><td>${teamCell(p)}</td>
+    <td>${p.G||0}</td><td>${p.AB||0}</td>
+    <td>${fmtAvg(p.AVG)}</td><td>${fmtAvg(p.SLG)}</td>
+    <td>${p.R??0}</td><td>${p.RBI??0}</td>
+    <td>${p.outs>0?p.IP:'—'}</td><td>${p.chances||0}</td>
+    <td>${fmtScore(p.hit_score)}</td><td>${fmtScore(p.pit_score)}</td>
+    <td>${fmtScore(p.field_score)}</td><td>${fmtScore(p.ovr_score)}</td>
+  </tr>`).join('');
+}
+
+function renderHitting(){
+  const rows=filtered().filter(p=>p.AB>0).sort((a,b)=>(b.hit_score||0)-(a.hit_score||0));
+  const tbody=document.getElementById('hitting-body');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="18" class="empty-msg">No data</td></tr>';return;}
+  tbody.innerHTML=rows.map(p=>`<tr>
+    <td>${nameCell(p)}</td><td>${teamCell(p)}</td>
+    <td>${p.G}</td><td>${p.AB}</td><td>${p.H}</td>
+    <td>${p['2B']}</td><td>${p['3B']}</td><td>${p.HR}</td>
+    <td>${p.R}</td><td>${p.RBI}</td><td>${p.BB}</td>
+    <td>${p.SB}</td><td>${p.SO}</td>
+    <td>${fmtAvg(p.AVG)}</td><td>${fmtAvg(p.OBP)}</td>
+    <td>${fmtAvg(p.SLG)}</td><td>${fmtAvg(p.OPS)}</td>
+    <td>${fmtScore(p.hit_score)}</td>
+  </tr>`).join('');
+}
+
+function renderPitching(){
+  const rows=filtered().filter(p=>p.outs>0).sort((a,b)=>(b.pit_score||0)-(a.pit_score||0));
+  const tbody=document.getElementById('pitching-body');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="14" class="empty-msg">No data</td></tr>';return;}
+  tbody.innerHTML=rows.map(p=>`<tr>
+    <td>${nameCell(p)}</td><td>${teamCell(p)}</td>
+    <td>${p.pit_G||0}</td><td>${p.IP}</td>
+    <td>${p.pit_H}</td><td>${p.pit_ER}</td><td>${p.pit_BB}</td><td>${p.pit_SO}</td>
+    <td>${fmtVal(p.ERA)}</td><td>${fmtVal(p.WHIP)}</td>
+    <td>${fmtVal(p.K6,1)}</td><td>${fmtVal(p.BB6,1)}</td>
+    <td>${p.STR_PCT!==null&&p.STR_PCT!==undefined?p.STR_PCT.toFixed(1)+'%':'—'}</td>
+    <td>${fmtScore(p.pit_score)}</td>
+  </tr>`).join('');
+}
+
+function renderFielding(){
+  let rows=filtered();
+  if(activePos!=='ALL'){
+    rows=rows.filter(p=>p.by_pos&&p.by_pos[activePos]).map(p=>{
+      const st=p.by_pos[activePos];
+      return{...p,_fPO:st.PO,_fA:st.A,_fE:st.E,_fTC:st.chances,_fInn:(st.innings||0),_fFP:st.fld_pct,_fFS:st.score};
+    }).sort((a,b)=>(b._fFS||0)-(a._fFS||0));
+  }else{
+    rows=rows.filter(p=>p.chances>0).map(p=>{
+      return{...p,_fPO:p.PO,_fA:p.A,_fE:p.E,_fTC:p.chances,_fInn:Object.values(p.by_pos||{}).reduce((s,v)=>s+(v.innings||0),0),_fFP:p.fld_pct,_fFS:p.field_score};
+    }).sort((a,b)=>(b._fFS||0)-(a._fFS||0));
+  }
+  const tbody=document.getElementById('fielding-body');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="9" class="empty-msg">No fielding data'+(activePos!=='ALL'?' at '+activePos:'')+'</td></tr>';return;}
+  tbody.innerHTML=rows.map(p=>{
+    const tags=p.by_pos?Object.keys(p.by_pos).map(pos=>`<span class="pos-tag">${pos}</span>`).join(''):'';
+    return`<tr>
+      <td>${nameCell(p)}</td><td>${teamCell(p)}</td><td>${tags}</td>
+      <td>${p._fPO??0}</td><td>${p._fA??0}</td><td>${p._fE??0}</td>
+      <td>${p._fTC??0}</td>
+      <td>${p._fInn??0}</td>
+      <td>${p._fFP!==null&&p._fFP!==undefined?p._fFP.toFixed(3).replace(/^0/,''):'—'}</td>
+      <td>${fmtScore(p._fFS)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function sortTable(tableId,col){
+  const dir=(sortState[tableId]?.col===col&&sortState[tableId]?.dir==='desc')?'asc':'desc';
+  sortState[tableId]={col,dir};
+  const tbody=document.getElementById(tableId).querySelector('tbody');
+  const rows=Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a,b)=>{
+    const va=cellVal(a,col),vb=cellVal(b,col);
+    if(typeof va==='string'&&typeof vb==='string')return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+    return dir==='asc'?(va||0)-(vb||0):(vb||0)-(va||0);
+  });
+  rows.forEach(r=>tbody.appendChild(r));
+  document.querySelectorAll(`#${tableId} thead th`).forEach((th,i)=>{
+    th.classList.remove('sort-asc','sort-desc');
+    if(i===col)th.classList.add(dir==='asc'?'sort-asc':'sort-desc');
+  });
+}
+
+function cellVal(row,col){
+  const cell=row.cells[col];if(!cell)return 0;
+  const text=cell.innerText.trim().replace(/[^0-9.-]/g,'');
+  const num=parseFloat(text);return isNaN(num)?cell.innerText.trim():num;
+}
+
+buildTeamFilter();renderRecords();render();
+
+function renderRecords() {
+  const div = document.getElementById('team-filter');
+  if (!div) return;
+  // Add W-L after each team button
+  setTimeout(function() {
+    document.querySelectorAll('.team-btn').forEach(function(btn) {
+      const tk = btn.dataset.tk;
+      if (!tk || !RECORDS[tk]) return;
+      const r = RECORDS[tk];
+      const rec = document.createElement('span');
+      rec.style.cssText = 'font-size:10px;color:var(--muted);margin-left:4px;vertical-align:middle';
+      rec.textContent = r.W+'-'+r.L+(r.T?'-'+r.T:'');
+      btn.appendChild(rec);
+    });
+  }, 50);
+}
+
+function renderGames() {
+  const rows = GAMES.filter(g => activeTeam === 'ALL' || g.team_key === activeTeam)
+    .sort((a,b) => a.date.localeCompare(b.date) || a.team_key.localeCompare(b.team_key));
+  const tbody = document.getElementById('games-body');
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No games yet</td></tr>'; return; }
+  const teamMap = {};
+  TEAMS.forEach(t => teamMap[t.key] = t);
+  tbody.innerHTML = rows.map(g => {
+    const t = teamMap[g.team_key] || {};
+    const color = t.color || '#888';
+    const shortName = (t.name||'').replace('MCB ','').replace(' 9U','');
+    const resColor = g.result==='W'?'#4caf50':g.result==='L'?'#e53935':'var(--muted)';
+    const gcLink = g.url ? `<a href="${g.url}" target="_blank" style="color:var(--accent);font-size:12px">View ↗</a>` : '—';
+    return `<tr>
+      <td style="text-align:left">${g.date}</td>
+      <td><div class="team-cell"><span class="team-dot" style="background:${color}"></span>${shortName}</div></td>
+      <td style="text-align:left">${g.opponent}</td>
+      <td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:${resColor}">${g.result||'—'}</td>
+      <td>${g.score.replace(/^[WLT]\s+/,'')}</td>
+      <td style="text-align:center">${gcLink}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderOpponents() {
+  const container = document.getElementById('opponents-container');
+  // Group games by opponent
+  const oppMap = {};
+  GAMES.filter(g => activeTeam==='ALL' || g.team_key===activeTeam).forEach(g => {
+    const opp = g.opponent.trim();
+    if (!oppMap[opp]) oppMap[opp] = [];
+    oppMap[opp].push(g);
+  });
+  // Sort opponents: multi-team first, then alpha
+  const opps = Object.keys(oppMap).sort((a,b) => {
+    const da = new Set(oppMap[a].map(g=>g.team_key)).size;
+    const db = new Set(oppMap[b].map(g=>g.team_key)).size;
+    return db-da || a.localeCompare(b);
+  });
+  const teamMap = {};
+  TEAMS.forEach(t => teamMap[t.key] = t);
+
+  if (!opps.length) { container.innerHTML = '<div class="empty-msg">No opponents yet</div>'; return; }
+
+  container.innerHTML = opps.map(opp => {
+    const games = oppMap[opp];
+    const teams = new Set(games.map(g=>g.team_key)).size;
+    const badge = teams > 1 ? `<span style="font-size:10px;background:#1a2a3a;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:1px 6px;margin-left:8px">${teams} teams</span>` : '';
+    const rows = games.map(g => {
+      const t = teamMap[g.team_key] || {};
+      const color = t.color||'#888';
+      const shortName = (t.name||'').replace('MCB ','').replace(' 9U','');
+      const resColor = g.result==='W'?'#4caf50':g.result==='L'?'#e53935':'var(--muted)';
+      return `<tr>
+        <td style="text-align:left">${g.date}</td>
+        <td><div class="team-cell"><span class="team-dot" style="background:${color}"></span>${shortName}</div></td>
+        <td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:${resColor}">${g.result||'—'}</td>
+        <td>${g.score.replace(/^[WLT]\s+/,'')}</td>
+        <td style="text-align:center">${g.url?`<a href="${g.url}" target="_blank" style="color:var(--accent);font-size:12px">View ↗</a>`:'—'}</td>
+      </tr>`;
+    }).join('');
+    return `<div style="margin-bottom:20px">
+      <div style="font-family:Oswald,sans-serif;font-size:15px;font-weight:600;color:var(--text);padding:8px 0 4px;border-bottom:1px solid var(--border)">${opp}${badge}</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr>
+          <th style="text-align:left;padding:6px 10px;color:var(--muted);font-size:11px;font-family:Oswald,sans-serif">Date</th>
+          <th style="text-align:left;padding:6px 10px;color:var(--muted);font-size:11px;font-family:Oswald,sans-serif">MCB Team</th>
+          <th style="padding:6px 10px;color:var(--muted);font-size:11px;font-family:Oswald,sans-serif">W/L</th>
+          <th style="padding:6px 10px;color:var(--muted);font-size:11px;font-family:Oswald,sans-serif">Score</th>
+          <th style="padding:6px 10px;color:var(--muted);font-size:11px;font-family:Oswald,sans-serif">Link</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
