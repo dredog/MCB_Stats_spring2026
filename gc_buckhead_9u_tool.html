@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCB 9U Summer 2026 Stats</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0e14;--surface:#161b26;--border:#252c3d;--border2:#1e2535;
+  --text:#e8eaf0;--muted:#7a7e8a;--gold:#f5c518;--accent:#4a78c4;
+  --green:#4caf50;--red:#e53935;--radius:6px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Source Sans 3',sans-serif;min-height:100vh}
+header{background:#11151e;border-bottom:2px solid var(--gold);padding:16px 24px 12px}
+.hdr-title{font-family:Oswald,sans-serif;font-size:26px;font-weight:700;color:var(--gold);letter-spacing:.06em;text-transform:uppercase}
+.hdr-sub{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 24px;background:#13172080;border-bottom:1px solid var(--border)}
+.tab-btn{font-family:Oswald,sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 16px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.tab-btn.active,.tab-btn:hover{background:var(--gold);color:#000;border-color:var(--gold)}
+.sep{width:1px;height:24px;background:var(--border);margin:0 4px}
+.filter-label{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.pos-btn{font-family:Oswald,sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;padding:5px 11px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.pos-btn.active{background:#1a2a3a;color:var(--accent);border-color:var(--accent)}
+.pos-btn:hover:not(.active){border-color:var(--muted);color:var(--text)}
+.team-btn{font-size:12px;font-family:Oswald,sans-serif;font-weight:600;padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.team-btn.active{color:#fff}
+main{padding:16px 24px 48px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:700px}
+thead th{font-family:Oswald,sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:first-child,thead th:nth-child(2){text-align:left}
+thead th:hover{color:var(--text)}
+thead th.sort-asc::after{content:' ↑';color:var(--gold)}
+thead th.sort-desc::after{content:' ↓';color:var(--gold)}
+tbody tr{border-bottom:1px solid var(--border2);transition:background .1s}
+tbody tr:hover{background:#1c2235}
+td{padding:7px 10px;text-align:right;white-space:nowrap;color:var(--text)}
+td:first-child,td:nth-child(2){text-align:left}
+.player-name{font-weight:600}
+.team-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.team-cell{display:flex;align-items:center}
+.score-cell{font-family:Oswald,sans-serif;font-weight:600;font-size:14px}
+.score-hi{color:#4caf50}.score-mid{color:var(--gold)}.score-lo{color:var(--muted)}
+.score-none{color:#3a4460;font-size:11px}
+.pos-tag{display:inline-block;font-size:10px;font-family:Oswald,sans-serif;font-weight:600;letter-spacing:.06em;padding:1px 5px;border-radius:3px;background:#1a2235;color:var(--muted);border:1px solid var(--border);margin-right:3px;margin-bottom:2px}
+.note{font-size:11px;color:var(--muted);padding:8px 0 4px;letter-spacing:.04em}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.empty-msg{text-align:center;padding:48px;color:var(--muted);font-family:Oswald,sans-serif;font-size:14px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:8px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:24px;position:relative}
+.modal-close{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+.modal-close:hover{color:var(--text)}
+.modal-title{font-family:Oswald,sans-serif;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:16px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;margin:12px 0}
+.stat-row{display:flex;justify-content:space-between;font-size:13px;border-bottom:1px solid var(--border2);padding:4px 0}
+.stat-label{color:var(--muted)}
+.stat-val{font-family:Oswald,sans-serif;font-weight:600;color:var(--text)}
+.section-hdr{font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px;border-bottom:1px solid var(--border);padding-bottom:4px}
+footer{text-align:center;font-size:11px;color:var(--muted);padding:16px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr-title">MCB 9U Summer 2026 &middot; Tournament Stats</div>
+  <div class="hdr-sub">Hitting &middot; Pitching &middot; Fielding &nbsp;&middot;&nbsp; Scraped Jun 30 2026 19:11</div>
+</header>
+
+<div class="controls" id="main-controls">
+  <button class="tab-btn active" onclick="showTab('ratings',event)">Overall Ratings</button>
+  <button class="tab-btn" onclick="showTab('hitting',event)">Hitting</button>
+  <button class="tab-btn" onclick="showTab('pitching',event)">Pitching</button>
+  <button class="tab-btn" onclick="showTab('fielding',event)">Fielding</button>
+  <button class="tab-btn" onclick="showTab('games',event)">Games</button>
+  <button class="tab-btn" onclick="showTab('opponents',event)">Opponents</button>
+  <div class="sep"></div>
+  <span class="filter-label">Team:</span>
+  <div id="team-filter" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+</div>
+<div class="controls" id="pos-controls" style="display:none">
+  <span class="filter-label">Position:</span>
+  <button class="pos-btn active" onclick="filterPos('ALL')">All</button>
+  <button class="pos-btn" onclick="filterPos('SS')">SS</button>
+  <button class="pos-btn" onclick="filterPos('2B')">2B</button>
+  <button class="pos-btn" onclick="filterPos('3B')">3B</button>
+  <button class="pos-btn" onclick="filterPos('1B')">1B</button>
+  <button class="pos-btn" onclick="filterPos('C')">C</button>
+  <button class="pos-btn" onclick="filterPos('P')">P</button>
+  <button class="pos-btn" onclick="filterPos('LF')">LF</button>
+  <button class="pos-btn" onclick="filterPos('CF')">CF</button>
+  <button class="pos-btn" onclick="filterPos('RF')">RF</button>
+</div>
+
+<main>
+  <div class="tab-pane active" id="tab-ratings">
+    <div class="note">OVR = 55% hitting + 30% pitching + 15% fielding (degrades gracefully when fewer qualify) &nbsp;&middot;&nbsp; min PA=4 / min outs=1 / min chances=1</div>
+    <table id="ratings-table"><thead><tr>
+      <th onclick="sortTable('ratings-table',0)">Player</th>
+      <th onclick="sortTable('ratings-table',1)">Team</th>
+      <th onclick="sortTable('ratings-table',2)">G</th>
+      <th onclick="sortTable('ratings-table',3)">AB</th>
+      <th onclick="sortTable('ratings-table',4)">AVG</th>
+      <th onclick="sortTable('ratings-table',5)">SLG</th>
+      <th onclick="sortTable('ratings-table',6)">R</th>
+      <th onclick="sortTable('ratings-table',7)">RBI</th>
+      <th onclick="sortTable('ratings-table',8)">IP</th>
+      <th onclick="sortTable('ratings-table',9)">TC</th>
+      <th onclick="sortTable('ratings-table',10)">HitScore</th>
+      <th onclick="sortTable('ratings-table',11)">PitScore</th>
+      <th onclick="sortTable('ratings-table',12)">FldScore</th>
+      <th onclick="sortTable('ratings-table',13)">OVR</th>
+    </tr></thead><tbody id="ratings-body"></tbody></table>
+  </div>
+
+  <div class="tab-pane" id="tab-hitting">
+    <table id="hitting-table"><thead><tr>
+      <th onclick="sortTable('hitting-table',0)">Player</th>
+      <th onclick="sortTable('hitting-table',1)">Team</th>
+      <th onclick="sortTable('hitting-table',2)">G</th>
+      <th onclick="sortTable('hitting-table',3)">PA</th>
+      <th onclick="sortTable('hitting-table',4)">AB</th>
+      <th onclick="sortTable('hitting-table',5)">H</th>
+      <th onclick="sortTable('hitting-table',6)">2B</th>
+      <th onclick="sortTable('hitting-table',7)">3B</th>
+      <th onclick="sortTable('hitting-table',8)">HR</th>
+      <th onclick="sortTable('hitting-table',9)">R</th>
+      <th onclick="sortTable('hitting-table',10)">RBI</th>
+      <th onclick="sortTable('hitting-table',11)">BB</th>
+      <th onclick="sortTable('hitting-table',12)">HBP</th>
+      <th onclick="sortTable('hitting-table',13)">SB</th>
+      <th onclick="sortTable('hitting-table',14)">SO</th>
+      <th onclick="sortTable('hitting-table',15)">AVG</th>
+      <th onclick="sortTable('hitting-table',16)">OBP</th>
+      <th onclick="sortTable('hitting-table',17)">SLG</th>
+      <th onclick="sortTable('hitting-table',18)">OPS</th>
+      <th onclick="sortTable('hitting-table',19)">HitScore</th>
+    </tr></thead><tbody id="hitting-body"></tbody></table>
+  </div>
+
+  <div class="tab-pane" id="tab-pitching">
+    <table id="pitching-table"><thead><tr>
+      <th onclick="sortTable('pitching-table',0)">Player</th>
+      <th onclick="sortTable('pitching-table',1)">Team</th>
+      <th onclick="sortTable('pitching-table',2)">G</th>
+      <th onclick="sortTable('pitching-table',3)">IP</th>
+      <th onclick="sortTable('pitching-table',4)" title="Batters Faced -- ~ marks an estimate (outs+H+BB) where exact BF wasn't available">BF</th>
+      <th onclick="sortTable('pitching-table',5)">H</th>
+      <th onclick="sortTable('pitching-table',6)">ER</th>
+      <th onclick="sortTable('pitching-table',7)">BB</th>
+      <th onclick="sortTable('pitching-table',8)">SO</th>
+      <th onclick="sortTable('pitching-table',9)">ERA</th>
+      <th onclick="sortTable('pitching-table',10)">WHIP</th>
+      <th onclick="sortTable('pitching-table',11)">K/6</th>
+      <th onclick="sortTable('pitching-table',12)">BB/6</th>
+      <th onclick="sortTable('pitching-table',13)">STR%</th>
+      <th onclick="sortTable('pitching-table',14)">PitScore</th>
+    </tr></thead><tbody id="pitching-body"></tbody></table>
+  </div>
+
+  <div class="tab-pane" id="tab-fielding">
+    <div class="note">Weighted by position difficulty &nbsp;&middot;&nbsp; SS assist = 4.0 pts &middot; OF putout = 3.0-3.5 pts &middot; 1B putout = 1.0 pt &middot; Errors = -0.5 pts &nbsp;&middot;&nbsp; *Inn = innings where player recorded a play at that position</div>
+    <table id="fielding-table"><thead><tr>
+      <th onclick="sortTable('fielding-table',0)">Player</th>
+      <th onclick="sortTable('fielding-table',1)">Team</th>
+      <th onclick="sortTable('fielding-table',2)">Positions</th>
+      <th onclick="sortTable('fielding-table',3)">PO</th>
+      <th onclick="sortTable('fielding-table',4)">A</th>
+      <th onclick="sortTable('fielding-table',5)">E</th>
+      <th onclick="sortTable('fielding-table',6)">TC</th>
+      <th onclick="sortTable('fielding-table',7)">Inn*</th>
+      <th onclick="sortTable('fielding-table',8)">FLD%</th>
+      <th onclick="sortTable('fielding-table',9)">FldScore</th>
+    </tr></thead><tbody id="fielding-body"></tbody></table>
+  </div>
+  <div class="tab-pane" id="tab-games">
+    <div class="note">All completed games &nbsp;&middot;&nbsp; Click a game link to view on GameChanger</div>
+    <table id="games-table"><thead><tr>
+      <th onclick="sortTable('games-table',0)">Date</th>
+      <th onclick="sortTable('games-table',1)">Team</th>
+      <th onclick="sortTable('games-table',2)">Opponent</th>
+      <th onclick="sortTable('games-table',3)" style="text-align:center">Result</th>
+      <th onclick="sortTable('games-table',4)">Score</th>
+      <th>GC Link</th>
+    </tr></thead><tbody id="games-body"></tbody></table>
+  </div>
+
+  <div class="tab-pane" id="tab-opponents">
+    <div class="note">Opponents faced by multiple MCB 9U teams &nbsp;&middot;&nbsp; Shows cross-team comparison</div>
+    <div id="opponents-container"></div>
+  </div>
+
+</main>
+
+<footer>MCB 9U Summer 2026 &middot; Stats scraped from GameChanger &middot; Not affiliated with MCB or GameChanger</footer>
+
+<script>
+const PLAYERS=[{"name": "Winn R", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 24, "AB": 54, "H": 35, "BB": 7, "HBP": 2, "SO": 7, "SB": 0, "R": 28, "RBI": 22, "2B": 3, "3B": 2, "HR": 1, "TB": 45, "PA": 63, "AVG": 0.648, "SLG": 0.833, "OBP": 0.698, "OPS": 1.531, "pit_G": 1, "outs": 3, "IP": "1.0", "ERA": 0.0, "K6": 18.0, "BB6": 12.0, "H6": 0.0, "WHIP": 2.0, "STR_PCT": 50.0, "pit_SO": 3, "pit_BB": 2, "pit_H": 0, "pit_ER": 0, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 22, "pit_strikes": 11, "PO": 13, "A": 8, "E": 0, "chances": 21, "fld_pct": 1.0, "by_pos": {"3B": {"PO": 5, "A": 4, "E": 0, "chances": 9, "innings": 9, "fld_pct": 1.0, "score": 63.1}, "2B": {"PO": 5, "A": 4, "E": 0, "chances": 9, "innings": 6, "fld_pct": 1.0, "score": 53.6}, "LF": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 51.2}, "CF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 53.3}}, "hit_score": 54.19, "pit_score": 73.2, "field_score": 81.1, "ovr_score": 59.72, "allstar": null, "id": 0}, {"name": "Hayes B", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 24, "AB": 40, "H": 26, "BB": 18, "HBP": 2, "SO": 3, "SB": 0, "R": 26, "RBI": 18, "2B": 4, "3B": 0, "HR": 0, "TB": 30, "PA": 60, "AVG": 0.65, "SLG": 0.75, "OBP": 0.767, "OPS": 1.517, "pit_G": 8, "outs": 27, "IP": "9.0", "ERA": 7.33, "K6": 2.0, "BB6": 6.7, "H6": 10.7, "WHIP": 2.89, "STR_PCT": 55.3, "pit_SO": 3, "pit_BB": 10, "pit_H": 16, "pit_ER": 11, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 188, "pit_strikes": 104, "PO": 8, "A": 11, "E": 0, "chances": 19, "fld_pct": 1.0, "by_pos": {"2B": {"PO": 2, "A": 9, "E": 0, "chances": 11, "innings": 10, "fld_pct": 1.0, "score": 55.6}, "RF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 48.7}, "P": {"PO": 1, "A": 2, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 30.8}, "1B": {"PO": 4, "A": 0, "E": 0, "chances": 4, "innings": 4, "fld_pct": 1.0, "score": 17.6}}, "hit_score": 55.65, "pit_score": 96.2, "field_score": 68.6, "ovr_score": 58.31, "allstar": null, "id": 1}, {"name": "Finn O", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 24, "AB": 42, "H": 24, "BB": 24, "HBP": 2, "SO": 9, "SB": 0, "R": 35, "RBI": 12, "2B": 4, "3B": 0, "HR": 2, "TB": 34, "PA": 68, "AVG": 0.571, "SLG": 0.81, "OBP": 0.735, "OPS": 1.545, "pit_G": 3, "outs": 8, "IP": "2.2", "ERA": 6.75, "K6": 6.8, "BB6": 13.5, "H6": 6.8, "WHIP": 3.38, "STR_PCT": 41.2, "pit_SO": 3, "pit_BB": 6, "pit_H": 3, "pit_ER": 3, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 68, "pit_strikes": 28, "PO": 11, "A": 7, "E": 0, "chances": 18, "fld_pct": 1.0, "by_pos": {"3B": {"PO": 10, "A": 7, "E": 0, "chances": 17, "innings": 16, "fld_pct": 1.0, "score": 64.7}, "LF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 48.7}}, "hit_score": 53.97, "pit_score": 60.5, "field_score": 64.7, "ovr_score": 56.17, "allstar": null, "id": 2}, {"name": "Miller B", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 24, "AB": 43, "H": 26, "BB": 7, "HBP": 0, "SO": 5, "SB": 0, "R": 19, "RBI": 11, "2B": 0, "3B": 0, "HR": 0, "TB": 26, "PA": 50, "AVG": 0.605, "SLG": 0.605, "OBP": 0.66, "OPS": 1.265, "pit_G": 12, "outs": 59, "IP": "19.2", "ERA": 7.02, "K6": 5.5, "BB6": 3.7, "H6": 10.1, "WHIP": 2.29, "STR_PCT": 57.7, "pit_SO": 18, "pit_BB": 12, "pit_H": 33, "pit_ER": 23, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 357, "pit_strikes": 206, "PO": 10, "A": 9, "E": 0, "chances": 19, "fld_pct": 1.0, "by_pos": {"P": {"PO": 1, "A": 4, "E": 0, "chances": 5, "innings": 4, "fld_pct": 1.0, "score": 34.8}, "CF": {"PO": 2, "A": 1, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 55.9}, "SS": {"PO": 6, "A": 4, "E": 0, "chances": 10, "innings": 7, "fld_pct": 1.0, "score": 64.4}, "2B": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 38.1}}, "hit_score": 44.24, "pit_score": 100.0, "field_score": 87.2, "ovr_score": 53.07, "allstar": null, "id": 3}, {"name": "Russell C", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 24, "AB": 59, "H": 35, "BB": 8, "HBP": 1, "SO": 6, "SB": 0, "R": 31, "RBI": 26, "2B": 8, "3B": 0, "HR": 1, "TB": 46, "PA": 68, "AVG": 0.593, "SLG": 0.78, "OBP": 0.647, "OPS": 1.427, "pit_G": 13, "outs": 71, "IP": "23.2", "ERA": 7.61, "K6": 7.6, "BB6": 6.1, "H6": 8.4, "WHIP": 2.41, "STR_PCT": 53.4, "pit_SO": 30, "pit_BB": 24, "pit_H": 33, "pit_ER": 30, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 466, "pit_strikes": 249, "PO": 5, "A": 6, "E": 0, "chances": 11, "fld_pct": 1.0, "by_pos": {"P": {"PO": 3, "A": 5, "E": 0, "chances": 8, "innings": 7, "fld_pct": 1.0, "score": 37.5}, "RF": {"PO": 2, "A": 1, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 50.9}}, "hit_score": 50.97, "pit_score": 99.3, "field_score": 57.1, "ovr_score": 52.23, "allstar": null, "id": 4}, {"name": "Rhodes B", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 24, "AB": 63, "H": 34, "BB": 5, "HBP": 3, "SO": 4, "SB": 0, "R": 27, "RBI": 18, "2B": 4, "3B": 1, "HR": 2, "TB": 46, "PA": 71, "AVG": 0.54, "SLG": 0.73, "OBP": 0.592, "OPS": 1.322, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 0, "pit_strikes": 0, "PO": 9, "A": 0, "E": 0, "chances": 9, "fld_pct": 1.0, "by_pos": {"RF": {"PO": 6, "A": 0, "E": 0, "chances": 6, "innings": 6, "fld_pct": 1.0, "score": 61.2}, "CF": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 56.0}, "LF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 48.7}}, "hit_score": 47.73, "pit_score": null, "field_score": 51.2, "ovr_score": 48.44, "allstar": null, "id": 5}, {"name": "Charlie F", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 24, "AB": 53, "H": 21, "BB": 17, "HBP": 0, "SO": 9, "SB": 0, "R": 30, "RBI": 17, "2B": 3, "3B": 1, "HR": 0, "TB": 26, "PA": 70, "AVG": 0.396, "SLG": 0.491, "OBP": 0.543, "OPS": 1.034, "pit_G": 2, "outs": 6, "IP": "2.0", "ERA": 12.0, "K6": 0.0, "BB6": 6.0, "H6": 9.0, "WHIP": 2.5, "STR_PCT": 62.9, "pit_SO": 0, "pit_BB": 2, "pit_H": 3, "pit_ER": 4, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 35, "pit_strikes": 22, "PO": 21, "A": 15, "E": 0, "chances": 36, "fld_pct": 1.0, "by_pos": {"2B": {"PO": 2, "A": 5, "E": 0, "chances": 7, "innings": 7, "fld_pct": 1.0, "score": 49.7}, "CF": {"PO": 5, "A": 0, "E": 0, "chances": 5, "innings": 5, "fld_pct": 1.0, "score": 64.2}, "SS": {"PO": 14, "A": 9, "E": 0, "chances": 23, "innings": 16, "fld_pct": 1.0, "score": 64.3}, "P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 30.4}}, "hit_score": 34.05, "pit_score": 89.5, "field_score": 91.7, "ovr_score": 45.9, "allstar": null, "id": 6}, {"name": "Jay B", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 24, "AB": 39, "H": 18, "BB": 10, "HBP": 6, "SO": 3, "SB": 0, "R": 13, "RBI": 17, "2B": 7, "3B": 0, "HR": 0, "TB": 25, "PA": 55, "AVG": 0.462, "SLG": 0.641, "OBP": 0.618, "OPS": 1.259, "pit_G": 8, "outs": 28, "IP": "9.1", "ERA": 4.5, "K6": 5.1, "BB6": 7.1, "H6": 5.8, "WHIP": 2.14, "STR_PCT": 54.7, "pit_SO": 8, "pit_BB": 11, "pit_H": 9, "pit_ER": 7, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 181, "pit_strikes": 99, "PO": 2, "A": 3, "E": 0, "chances": 5, "fld_pct": 1.0, "by_pos": {"C": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 3.0}, "2B": {"PO": 1, "A": 2, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 41.9}, "P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 30.4}}, "hit_score": 44.39, "pit_score": 97.3, "field_score": 30.3, "ovr_score": 41.49, "allstar": null, "id": 7}, {"name": "Wills M", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 24, "AB": 54, "H": 23, "BB": 3, "HBP": 1, "SO": 4, "SB": 0, "R": 18, "RBI": 17, "2B": 6, "3B": 0, "HR": 0, "TB": 29, "PA": 58, "AVG": 0.426, "SLG": 0.537, "OBP": 0.466, "OPS": 1.003, "pit_G": 16, "outs": 85, "IP": "28.1", "ERA": 4.87, "K6": 7.2, "BB6": 4.7, "H6": 9.5, "WHIP": 2.36, "STR_PCT": 57.8, "pit_SO": 34, "pit_BB": 22, "pit_H": 45, "pit_ER": 23, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 535, "pit_strikes": 309, "PO": 7, "A": 4, "E": 0, "chances": 11, "fld_pct": 1.0, "by_pos": {"P": {"PO": 2, "A": 4, "E": 0, "chances": 6, "innings": 6, "fld_pct": 1.0, "score": 35.0}, "1B": {"PO": 3, "A": 0, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 16.8}, "3B": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 38.1}, "RF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 48.7}}, "hit_score": 35.27, "pit_score": 100.0, "field_score": 49.3, "ovr_score": 38.15, "allstar": null, "id": 8}, {"name": "Whit B", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 16, "AB": 36, "H": 12, "BB": 10, "HBP": 0, "SO": 5, "SB": 0, "R": 13, "RBI": 15, "2B": 0, "3B": 0, "HR": 0, "TB": 12, "PA": 46, "AVG": 0.333, "SLG": 0.333, "OBP": 0.478, "OPS": 0.811, "pit_G": 8, "outs": 35, "IP": "11.2", "ERA": 8.23, "K6": 5.1, "BB6": 6.2, "H6": 7.2, "WHIP": 2.23, "STR_PCT": 51.9, "pit_SO": 10, "pit_BB": 12, "pit_H": 14, "pit_ER": 16, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 214, "pit_strikes": 111, "PO": 8, "A": 12, "E": 0, "chances": 20, "fld_pct": 1.0, "by_pos": {"SS": {"PO": 8, "A": 10, "E": 0, "chances": 18, "innings": 15, "fld_pct": 1.0, "score": 67.9}, "P": {"PO": 0, "A": 2, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 32.0}}, "hit_score": 25.99, "pit_score": 95.5, "field_score": 74.2, "ovr_score": 35.9, "allstar": null, "id": 9}, {"name": "Henry K", "team_key": "BH_BUCKS", "team_name": "Buckhead Bucks 9U", "G": 23, "AB": 34, "H": 12, "BB": 20, "HBP": 1, "SO": 10, "SB": 0, "R": 21, "RBI": 13, "2B": 4, "3B": 0, "HR": 0, "TB": 16, "PA": 55, "AVG": 0.353, "SLG": 0.471, "OBP": 0.6, "OPS": 1.071, "pit_G": 1, "outs": 3, "IP": "1.0", "ERA": 6.0, "K6": 0.0, "BB6": 0.0, "H6": 18.0, "WHIP": 3.0, "STR_PCT": 57.1, "pit_SO": 0, "pit_BB": 0, "pit_H": 3, "pit_ER": 1, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 14, "pit_strikes": 8, "PO": 8, "A": 0, "E": 0, "chances": 8, "fld_pct": 1.0, "by_pos": {"1B": {"PO": 7, "A": 0, "E": 0, "chances": 7, "innings": 7, "fld_pct": 1.0, "score": 19.9}, "C": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 3.0}}, "hit_score": 32.92, "pit_score": 81.0, "field_score": 15.3, "ovr_score": 29.3, "allstar": null, "id": 10}, {"name": "Chance R", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 51, "H": 31, "BB": 9, "HBP": 2, "SO": 6, "SB": 0, "R": 30, "RBI": 24, "2B": 8, "3B": 0, "HR": 3, "TB": 48, "PA": 62, "AVG": 0.608, "SLG": 0.941, "OBP": 0.677, "OPS": 1.618, "pit_G": 8, "outs": 58, "IP": "19.1", "ERA": 3.1, "K6": 3.7, "BB6": 0.6, "H6": 8.1, "WHIP": 1.45, "STR_PCT": 66.9, "pit_SO": 12, "pit_BB": 2, "pit_H": 26, "pit_ER": 10, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 236, "pit_strikes": 158, "PO": 9, "A": 14, "E": 0, "chances": 23, "fld_pct": 1.0, "by_pos": {"SS": {"PO": 1, "A": 8, "E": 0, "chances": 9, "innings": 8, "fld_pct": 1.0, "score": 72.7}, "P": {"PO": 2, "A": 6, "E": 0, "chances": 8, "innings": 7, "fld_pct": 1.0, "score": 38.8}, "CF": {"PO": 5, "A": 0, "E": 0, "chances": 5, "innings": 4, "fld_pct": 1.0, "score": 64.2}, "LF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 48.7}}, "hit_score": 58.16, "pit_score": 100.0, "field_score": 90.5, "ovr_score": 64.81, "allstar": null, "id": 11}, {"name": "William D", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 50, "H": 27, "BB": 16, "HBP": 1, "SO": 1, "SB": 0, "R": 37, "RBI": 17, "2B": 5, "3B": 2, "HR": 2, "TB": 42, "PA": 67, "AVG": 0.54, "SLG": 0.84, "OBP": 0.657, "OPS": 1.497, "pit_G": 6, "outs": 39, "IP": "13.0", "ERA": 10.15, "K6": 6.0, "BB6": 7.4, "H6": 11.5, "WHIP": 3.15, "STR_PCT": 57.0, "pit_SO": 13, "pit_BB": 16, "pit_H": 25, "pit_ER": 22, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 293, "pit_strikes": 167, "PO": 11, "A": 27, "E": 1, "chances": 39, "fld_pct": 0.974, "by_pos": {"SS": {"PO": 8, "A": 22, "E": 1, "chances": 31, "innings": 27, "fld_pct": 0.968, "score": 69.3}, "P": {"PO": 0, "A": 5, "E": 0, "chances": 5, "innings": 4, "fld_pct": 1.0, "score": 36.7}, "CF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 53.3}, "1B": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 16.0}}, "hit_score": 56.01, "pit_score": 100.0, "field_score": 81.6, "ovr_score": 61.27, "allstar": null, "id": 12}, {"name": "Reid P", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 44, "H": 23, "BB": 14, "HBP": 0, "SO": 9, "SB": 0, "R": 24, "RBI": 12, "2B": 3, "3B": 0, "HR": 3, "TB": 35, "PA": 58, "AVG": 0.523, "SLG": 0.795, "OBP": 0.638, "OPS": 1.433, "pit_G": 4, "outs": 12, "IP": "4.0", "ERA": 10.5, "K6": 4.5, "BB6": 13.5, "H6": 13.5, "WHIP": 4.5, "STR_PCT": 46.7, "pit_SO": 3, "pit_BB": 9, "pit_H": 9, "pit_ER": 7, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 105, "pit_strikes": 49, "PO": 8, "A": 11, "E": 2, "chances": 21, "fld_pct": 0.905, "by_pos": {"2B": {"PO": 1, "A": 8, "E": 0, "chances": 9, "innings": 7, "fld_pct": 1.0, "score": 53.6}, "CF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 53.3}, "C": {"PO": 0, "A": 0, "E": 2, "chances": 2, "innings": 2, "fld_pct": 0.0, "score": 0.0}, "P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 30.4}, "RF": {"PO": 6, "A": 2, "E": 0, "chances": 8, "innings": 8, "fld_pct": 1.0, "score": 63.5}}, "hit_score": 49.16, "pit_score": 69.8, "field_score": 83.3, "ovr_score": 56.18, "allstar": null, "id": 13}, {"name": "John L", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 54, "H": 32, "BB": 12, "HBP": 1, "SO": 6, "SB": 0, "R": 30, "RBI": 26, "2B": 8, "3B": 3, "HR": 3, "TB": 55, "PA": 67, "AVG": 0.593, "SLG": 1.019, "OBP": 0.672, "OPS": 1.691, "pit_G": 5, "outs": 18, "IP": "6.0", "ERA": 11.0, "K6": 11.0, "BB6": 8.0, "H6": 12.0, "WHIP": 3.33, "STR_PCT": 54.1, "pit_SO": 11, "pit_BB": 8, "pit_H": 12, "pit_ER": 11, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 157, "pit_strikes": 85, "PO": 0, "A": 4, "E": 2, "chances": 6, "fld_pct": 0.667, "by_pos": {"1B": {"PO": 0, "A": 0, "E": 1, "chances": 1, "innings": 1, "fld_pct": 0.0, "score": 0.0}, "LF": {"PO": 0, "A": 0, "E": 1, "chances": 1, "innings": 1, "fld_pct": 0.0, "score": 0.0}, "3B": {"PO": 0, "A": 4, "E": 0, "chances": 4, "innings": 4, "fld_pct": 1.0, "score": 61.4}}, "hit_score": 61.39, "pit_score": 85.6, "field_score": 29.3, "ovr_score": 54.8, "allstar": null, "id": 14}, {"name": "Crews M", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 48, "H": 25, "BB": 9, "HBP": 0, "SO": 4, "SB": 0, "R": 20, "RBI": 26, "2B": 6, "3B": 1, "HR": 3, "TB": 42, "PA": 57, "AVG": 0.521, "SLG": 0.875, "OBP": 0.596, "OPS": 1.471, "pit_G": 6, "outs": 20, "IP": "6.2", "ERA": 1.8, "K6": 2.7, "BB6": 5.4, "H6": 3.6, "WHIP": 1.5, "STR_PCT": 53.1, "pit_SO": 3, "pit_BB": 6, "pit_H": 4, "pit_ER": 2, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 113, "pit_strikes": 60, "PO": 8, "A": 1, "E": 1, "chances": 10, "fld_pct": 0.9, "by_pos": {"1B": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 16.0}, "LF": {"PO": 5, "A": 0, "E": 0, "chances": 5, "innings": 5, "fld_pct": 1.0, "score": 58.7}, "C": {"PO": 0, "A": 0, "E": 1, "chances": 1, "innings": 1, "fld_pct": 0.0, "score": 0.0}, "CF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 53.3}, "P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 30.4}}, "hit_score": 53.55, "pit_score": 89.8, "field_score": 59.0, "ovr_score": 54.67, "allstar": null, "id": 15}, {"name": "Leo S", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 59, "H": 37, "BB": 13, "HBP": 0, "SO": 12, "SB": 0, "R": 33, "RBI": 24, "2B": 4, "3B": 3, "HR": 6, "TB": 65, "PA": 72, "AVG": 0.627, "SLG": 1.102, "OBP": 0.694, "OPS": 1.796, "pit_G": 6, "outs": 35, "IP": "11.2", "ERA": 4.63, "K6": 5.1, "BB6": 4.1, "H6": 8.2, "WHIP": 2.06, "STR_PCT": 61.8, "pit_SO": 10, "pit_BB": 8, "pit_H": 16, "pit_ER": 9, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 220, "pit_strikes": 136, "PO": 13, "A": 0, "E": 4, "chances": 17, "fld_pct": 0.765, "by_pos": {"1B": {"PO": 12, "A": 0, "E": 4, "chances": 16, "innings": 12, "fld_pct": 0.75, "score": 15.0}, "LF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 48.7}}, "hit_score": 63.24, "pit_score": 100.0, "field_score": 17.2, "ovr_score": 53.78, "allstar": null, "id": 16}, {"name": "Harris G", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 55, "H": 29, "BB": 6, "HBP": 4, "SO": 6, "SB": 0, "R": 22, "RBI": 21, "2B": 6, "3B": 1, "HR": 1, "TB": 40, "PA": 65, "AVG": 0.527, "SLG": 0.727, "OBP": 0.6, "OPS": 1.327, "pit_G": 6, "outs": 20, "IP": "6.2", "ERA": 8.1, "K6": 8.1, "BB6": 9.9, "H6": 5.4, "WHIP": 2.55, "STR_PCT": 49.0, "pit_SO": 9, "pit_BB": 11, "pit_H": 6, "pit_ER": 9, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 155, "pit_strikes": 76, "PO": 12, "A": 8, "E": 2, "chances": 22, "fld_pct": 0.909, "by_pos": {"1B": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 16.0}, "3B": {"PO": 8, "A": 8, "E": 2, "chances": 18, "innings": 16, "fld_pct": 0.889, "score": 58.5}, "P": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 22.8}, "LF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 48.7}}, "hit_score": 46.61, "pit_score": 79.9, "field_score": 72.7, "ovr_score": 51.97, "allstar": null, "id": 17}, {"name": "Jack T", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 43, "H": 20, "BB": 17, "HBP": 1, "SO": 11, "SB": 0, "R": 22, "RBI": 16, "2B": 4, "3B": 0, "HR": 1, "TB": 27, "PA": 61, "AVG": 0.465, "SLG": 0.628, "OBP": 0.623, "OPS": 1.251, "pit_G": 6, "outs": 27, "IP": "9.0", "ERA": 2.0, "K6": 2.0, "BB6": 1.3, "H6": 10.7, "WHIP": 2.0, "STR_PCT": 60.7, "pit_SO": 3, "pit_BB": 2, "pit_H": 16, "pit_ER": 3, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 122, "pit_strikes": 74, "PO": 13, "A": 12, "E": 0, "chances": 25, "fld_pct": 1.0, "by_pos": {"2B": {"PO": 8, "A": 12, "E": 0, "chances": 20, "innings": 20, "fld_pct": 1.0, "score": 55.6}, "RF": {"PO": 3, "A": 0, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 53.7}, "CF": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 56.0}}, "hit_score": 40.78, "pit_score": 100.0, "field_score": 71.7, "ovr_score": 47.13, "allstar": null, "id": 18}, {"name": "Charles Boone P", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 45, "H": 22, "BB": 11, "HBP": 0, "SO": 5, "SB": 0, "R": 24, "RBI": 21, "2B": 6, "3B": 1, "HR": 0, "TB": 30, "PA": 56, "AVG": 0.489, "SLG": 0.667, "OBP": 0.589, "OPS": 1.256, "pit_G": 8, "outs": 52, "IP": "17.1", "ERA": 6.58, "K6": 4.2, "BB6": 4.8, "H6": 10.0, "WHIP": 2.48, "STR_PCT": 57.3, "pit_SO": 12, "pit_BB": 14, "pit_H": 29, "pit_ER": 19, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 314, "pit_strikes": 180, "PO": 6, "A": 4, "E": 2, "chances": 12, "fld_pct": 0.833, "by_pos": {"1B": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 15.2}, "P": {"PO": 4, "A": 2, "E": 1, "chances": 7, "innings": 7, "fld_pct": 0.857, "score": 27.6}, "C": {"PO": 0, "A": 1, "E": 1, "chances": 2, "innings": 2, "fld_pct": 0.5, "score": 13.6}, "RF": {"PO": 1, "A": 1, "E": 0, "chances": 2, "innings": 1, "fld_pct": 1.0, "score": 47.2}}, "hit_score": 44.3, "pit_score": 100.0, "field_score": 40.5, "ovr_score": 43.52, "allstar": null, "id": 19}, {"name": "Preston R", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 47, "H": 20, "BB": 9, "HBP": 1, "SO": 12, "SB": 0, "R": 17, "RBI": 22, "2B": 5, "3B": 0, "HR": 2, "TB": 31, "PA": 57, "AVG": 0.426, "SLG": 0.66, "OBP": 0.526, "OPS": 1.186, "pit_G": 6, "outs": 24, "IP": "8.0", "ERA": 9.0, "K6": 5.2, "BB6": 5.2, "H6": 9.8, "WHIP": 2.5, "STR_PCT": 51.7, "pit_SO": 7, "pit_BB": 7, "pit_H": 13, "pit_ER": 12, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 172, "pit_strikes": 89, "PO": 12, "A": 1, "E": 1, "chances": 14, "fld_pct": 0.929, "by_pos": {"P": {"PO": 3, "A": 1, "E": 1, "chances": 5, "innings": 4, "fld_pct": 0.8, "score": 22.7}, "3B": {"PO": 4, "A": 0, "E": 0, "chances": 4, "innings": 4, "fld_pct": 1.0, "score": 43.9}, "RF": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 51.2}, "CF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 53.3}, "LF": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 51.2}}, "hit_score": 37.64, "pit_score": 86.9, "field_score": 45.8, "ovr_score": 39.32, "allstar": null, "id": 20}, {"name": "Joseph P", "team_key": "BH_BRAVES", "team_name": "Buckhead Braves 9U", "G": 24, "AB": 45, "H": 13, "BB": 7, "HBP": 0, "SO": 6, "SB": 0, "R": 9, "RBI": 16, "2B": 1, "3B": 2, "HR": 0, "TB": 18, "PA": 52, "AVG": 0.289, "SLG": 0.4, "OBP": 0.385, "OPS": 0.785, "pit_G": 5, "outs": 16, "IP": "5.1", "ERA": 11.25, "K6": 7.9, "BB6": 10.1, "H6": 12.4, "WHIP": 3.75, "STR_PCT": 51.9, "pit_SO": 7, "pit_BB": 9, "pit_H": 11, "pit_ER": 10, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 135, "pit_strikes": 70, "PO": 17, "A": 6, "E": 0, "chances": 23, "fld_pct": 1.0, "by_pos": {"2B": {"PO": 2, "A": 4, "E": 0, "chances": 6, "innings": 5, "fld_pct": 1.0, "score": 47.8}, "CF": {"PO": 11, "A": 0, "E": 0, "chances": 11, "innings": 9, "fld_pct": 1.0, "score": 77.8}, "P": {"PO": 1, "A": 2, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 30.8}, "RF": {"PO": 2, "A": 0, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 51.2}, "LF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 48.7}}, "hit_score": 25.27, "pit_score": 80.5, "field_score": 89.4, "ovr_score": 38.45, "allstar": null, "id": 21}, {"name": "Samuel B", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 5, "AB": 15, "H": 11, "BB": 1, "HBP": 0, "SO": 1, "SB": 0, "R": 9, "RBI": 5, "2B": 1, "3B": 1, "HR": 0, "TB": 14, "PA": 16, "AVG": 0.733, "SLG": 0.933, "OBP": 0.75, "OPS": 1.683, "pit_G": 9, "outs": 49, "IP": "16.1", "ERA": 8.08, "K6": 5.5, "BB6": 4.4, "H6": 13.2, "WHIP": 2.94, "STR_PCT": 60.4, "pit_SO": 15, "pit_BB": 12, "pit_H": 36, "pit_ER": 22, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 341, "pit_strikes": 206, "PO": 7, "A": 4, "E": 1, "chances": 12, "fld_pct": 0.917, "by_pos": {"SS": {"PO": 3, "A": 1, "E": 1, "chances": 5, "innings": 4, "fld_pct": 0.8, "score": 39.2}, "P": {"PO": 4, "A": 3, "E": 0, "chances": 7, "innings": 6, "fld_pct": 1.0, "score": 34.1}}, "hit_score": 52.42, "pit_score": 100.0, "field_score": 54.2, "ovr_score": 52.79, "allstar": null, "id": 22}, {"name": "Evan R", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 9, "AB": 13, "H": 8, "BB": 8, "HBP": 0, "SO": 2, "SB": 0, "R": 12, "RBI": 13, "2B": 1, "3B": 1, "HR": 0, "TB": 11, "PA": 21, "AVG": 0.615, "SLG": 0.846, "OBP": 0.762, "OPS": 1.608, "pit_G": 3, "outs": 15, "IP": "5.0", "ERA": 4.8, "K6": 1.2, "BB6": 8.4, "H6": 6.0, "WHIP": 2.4, "STR_PCT": 50.6, "pit_SO": 1, "pit_BB": 7, "pit_H": 5, "pit_ER": 4, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 89, "pit_strikes": 45, "PO": 0, "A": 5, "E": 0, "chances": 5, "fld_pct": 1.0, "by_pos": {"2B": {"PO": 0, "A": 3, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 41.9}, "P": {"PO": 0, "A": 2, "E": 0, "chances": 2, "innings": 1, "fld_pct": 1.0, "score": 32.0}}, "hit_score": 51.15, "pit_score": 80.6, "field_score": 31.2, "ovr_score": 47.05, "allstar": null, "id": 23}, {"name": "Jacob T", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 6, "AB": 12, "H": 6, "BB": 3, "HBP": 2, "SO": 0, "SB": 0, "R": 11, "RBI": 2, "2B": 1, "3B": 0, "HR": 0, "TB": 7, "PA": 17, "AVG": 0.5, "SLG": 0.583, "OBP": 0.647, "OPS": 1.23, "pit_G": 8, "outs": 60, "IP": "20.0", "ERA": 5.7, "K6": 4.5, "BB6": 1.2, "H6": 10.5, "WHIP": 1.95, "STR_PCT": 65.6, "pit_SO": 15, "pit_BB": 4, "pit_H": 35, "pit_ER": 19, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 282, "pit_strikes": 185, "PO": 3, "A": 8, "E": 0, "chances": 11, "fld_pct": 1.0, "by_pos": {"P": {"PO": 3, "A": 8, "E": 0, "chances": 11, "innings": 8, "fld_pct": 1.0, "score": 41.4}}, "hit_score": 38.49, "pit_score": 100.0, "field_score": 41.4, "ovr_score": 39.09, "allstar": null, "id": 24}, {"name": "James E", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 5, "AB": 8, "H": 3, "BB": 6, "HBP": 0, "SO": 3, "SB": 0, "R": 7, "RBI": 6, "2B": 0, "3B": 1, "HR": 1, "TB": 8, "PA": 14, "AVG": 0.375, "SLG": 1.0, "OBP": 0.643, "OPS": 1.643, "pit_G": 7, "outs": 25, "IP": "8.1", "ERA": 10.08, "K6": 9.4, "BB6": 11.5, "H6": 9.4, "WHIP": 3.48, "STR_PCT": 47.0, "pit_SO": 13, "pit_BB": 16, "pit_H": 13, "pit_ER": 14, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 230, "pit_strikes": 108, "PO": 0, "A": 2, "E": 2, "chances": 4, "fld_pct": 0.5, "by_pos": {"P": {"PO": 0, "A": 2, "E": 2, "chances": 4, "innings": 4, "fld_pct": 0.5, "score": 14.9}}, "hit_score": 45.77, "pit_score": 78.9, "field_score": 7.9, "ovr_score": 37.99, "allstar": null, "id": 25}, {"name": "James S", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 12, "AB": 15, "H": 6, "BB": 13, "HBP": 1, "SO": 2, "SB": 0, "R": 8, "RBI": 5, "2B": 0, "3B": 0, "HR": 0, "TB": 6, "PA": 29, "AVG": 0.4, "SLG": 0.4, "OBP": 0.69, "OPS": 1.09, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 0, "pit_strikes": 0, "PO": 1, "A": 0, "E": 1, "chances": 2, "fld_pct": 0.5, "by_pos": {"3B": {"PO": 0, "A": 0, "E": 1, "chances": 1, "innings": 1, "fld_pct": 0.0, "score": 0.0}, "RF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 48.7}}, "hit_score": 34.31, "pit_score": null, "field_score": null, "ovr_score": 34.31, "allstar": null, "id": 26}, {"name": "Robert 'Bobby' D", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 10, "AB": 17, "H": 8, "BB": 4, "HBP": 0, "SO": 4, "SB": 0, "R": 8, "RBI": 7, "2B": 2, "3B": 0, "HR": 0, "TB": 10, "PA": 21, "AVG": 0.471, "SLG": 0.588, "OBP": 0.571, "OPS": 1.159, "pit_G": 2, "outs": 4, "IP": "1.1", "ERA": 31.5, "K6": 9.0, "BB6": 31.5, "H6": 13.5, "WHIP": 7.5, "STR_PCT": 39.3, "pit_SO": 2, "pit_BB": 7, "pit_H": 3, "pit_ER": 7, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 61, "pit_strikes": 24, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": 32.85, "pit_score": 52.0, "field_score": null, "ovr_score": 32.85, "allstar": null, "id": 27}, {"name": "Henry M", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 7, "AB": 13, "H": 5, "BB": 4, "HBP": 1, "SO": 1, "SB": 0, "R": 5, "RBI": 5, "2B": 3, "3B": 0, "HR": 0, "TB": 8, "PA": 18, "AVG": 0.385, "SLG": 0.615, "OBP": 0.556, "OPS": 1.171, "pit_G": 2, "outs": 6, "IP": "2.0", "ERA": 21.0, "K6": 0.0, "BB6": 12.0, "H6": 12.0, "WHIP": 4.0, "STR_PCT": 43.5, "pit_SO": 0, "pit_BB": 4, "pit_H": 4, "pit_ER": 7, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 46, "pit_strikes": 20, "PO": 0, "A": 1, "E": 0, "chances": 1, "fld_pct": 1.0, "by_pos": {"P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 30.4}}, "hit_score": 35.57, "pit_score": 59.3, "field_score": 6.4, "ovr_score": 29.58, "allstar": null, "id": 28}, {"name": "Jefferson S", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 12, "AB": 19, "H": 7, "BB": 4, "HBP": 1, "SO": 2, "SB": 0, "R": 10, "RBI": 7, "2B": 1, "3B": 0, "HR": 0, "TB": 8, "PA": 24, "AVG": 0.368, "SLG": 0.421, "OBP": 0.5, "OPS": 0.921, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 0, "pit_strikes": 0, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": 27.77, "pit_score": null, "field_score": null, "ovr_score": 27.77, "allstar": null, "id": 29}, {"name": "Anderson T", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 8, "AB": 13, "H": 4, "BB": 4, "HBP": 0, "SO": 2, "SB": 0, "R": 6, "RBI": 2, "2B": 1, "3B": 0, "HR": 0, "TB": 5, "PA": 17, "AVG": 0.308, "SLG": 0.385, "OBP": 0.471, "OPS": 0.856, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 0, "pit_strikes": 0, "PO": 1, "A": 2, "E": 1, "chances": 4, "fld_pct": 0.75, "by_pos": {"2B": {"PO": 0, "A": 2, "E": 0, "chances": 2, "innings": 1, "fld_pct": 1.0, "score": 40.0}, "CF": {"PO": 1, "A": 0, "E": 1, "chances": 2, "innings": 2, "fld_pct": 0.5, "score": 25.6}}, "hit_score": 23.4, "pit_score": null, "field_score": 13.8, "ovr_score": 21.43, "allstar": null, "id": 30}, {"name": "Jacob P", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 12, "AB": 26, "H": 6, "BB": 3, "HBP": 0, "SO": 6, "SB": 0, "R": 5, "RBI": 7, "2B": 0, "3B": 1, "HR": 0, "TB": 8, "PA": 29, "AVG": 0.231, "SLG": 0.308, "OBP": 0.31, "OPS": 0.618, "pit_G": 2, "outs": 4, "IP": "1.1", "ERA": 18.0, "K6": 9.0, "BB6": 22.5, "H6": 13.5, "WHIP": 6.0, "STR_PCT": 44.4, "pit_SO": 2, "pit_BB": 5, "pit_H": 3, "pit_ER": 4, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 54, "pit_strikes": 24, "PO": 0, "A": 0, "E": 0, "chances": 0, "fld_pct": null, "by_pos": {}, "hit_score": 14.98, "pit_score": 59.5, "field_score": null, "ovr_score": 14.98, "allstar": null, "id": 31}, {"name": "Hunter E", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 8, "AB": 17, "H": 4, "BB": 3, "HBP": 1, "SO": 5, "SB": 0, "R": 3, "RBI": 3, "2B": 1, "3B": 0, "HR": 0, "TB": 5, "PA": 21, "AVG": 0.235, "SLG": 0.294, "OBP": 0.381, "OPS": 0.675, "pit_G": 4, "outs": 14, "IP": "4.2", "ERA": 6.43, "K6": 6.4, "BB6": 3.9, "H6": 10.3, "WHIP": 2.36, "STR_PCT": 56.6, "pit_SO": 5, "pit_BB": 3, "pit_H": 8, "pit_ER": 5, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 106, "pit_strikes": 60, "PO": 1, "A": 1, "E": 0, "chances": 2, "fld_pct": 1.0, "by_pos": {"P": {"PO": 1, "A": 1, "E": 0, "chances": 2, "innings": 2, "fld_pct": 1.0, "score": 28.0}}, "hit_score": 14.35, "pit_score": 88.7, "field_score": 8.1, "ovr_score": 13.07, "allstar": null, "id": 32}, {"name": "Robert", "team_key": "BH_BULLDOGS", "team_name": "Buckhead Bulldogs 9U", "G": 0, "AB": 0, "H": 0, "BB": 0, "HBP": 0, "SO": 0, "SB": 0, "R": 0, "RBI": 0, "2B": 0, "3B": 0, "HR": 0, "TB": 0, "PA": 0, "AVG": 0.0, "SLG": 0.0, "OBP": 0.0, "OPS": 0.0, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 0, "pit_strikes": 0, "PO": 1, "A": 0, "E": 0, "chances": 1, "fld_pct": 1.0, "by_pos": {"C": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 3.0}}, "hit_score": null, "pit_score": null, "field_score": 0.6, "ovr_score": 0.6, "allstar": null, "id": 33}, {"name": "Lofton B", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 3, "AB": 4, "H": 4, "BB": 3, "HBP": 0, "SO": 0, "SB": 0, "R": 5, "RBI": 1, "2B": 1, "3B": 0, "HR": 0, "TB": 5, "PA": 7, "AVG": 1.0, "SLG": 1.25, "OBP": 1.0, "OPS": 2.25, "pit_G": 3, "outs": 10, "IP": "3.1", "ERA": 12.6, "K6": 3.6, "BB6": 3.6, "H6": 21.6, "WHIP": 4.2, "STR_PCT": 59.4, "pit_SO": 2, "pit_BB": 2, "pit_H": 12, "pit_ER": 7, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 69, "pit_strikes": 41, "PO": 5, "A": 8, "E": 0, "chances": 13, "fld_pct": 1.0, "by_pos": {"P": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 22.8}, "SS": {"PO": 1, "A": 3, "E": 0, "chances": 4, "innings": 3, "fld_pct": 1.0, "score": 57.1}, "2B": {"PO": 3, "A": 5, "E": 0, "chances": 8, "innings": 5, "fld_pct": 1.0, "score": 51.7}}, "hit_score": 70.01, "pit_score": 87.2, "field_score": 73.4, "ovr_score": 70.71, "allstar": null, "id": 34}, {"name": "Finn G", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 15, "AB": 27, "H": 16, "BB": 10, "HBP": 0, "SO": 3, "SB": 0, "R": 12, "RBI": 12, "2B": 2, "3B": 2, "HR": 1, "TB": 25, "PA": 37, "AVG": 0.593, "SLG": 0.926, "OBP": 0.703, "OPS": 1.629, "pit_G": 3, "outs": 12, "IP": "4.0", "ERA": 19.5, "K6": 7.5, "BB6": 15.0, "H6": 16.5, "WHIP": 5.25, "STR_PCT": 48.2, "pit_SO": 5, "pit_BB": 10, "pit_H": 11, "pit_ER": 13, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 114, "pit_strikes": 55, "PO": 4, "A": 3, "E": 0, "chances": 7, "fld_pct": 1.0, "by_pos": {"3B": {"PO": 3, "A": 3, "E": 0, "chances": 6, "innings": 6, "fld_pct": 1.0, "score": 57.3}, "P": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 22.8}}, "hit_score": 58.18, "pit_score": 70.2, "field_score": 49.7, "ovr_score": 56.44, "allstar": null, "id": 35}, {"name": "Gray C", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 15, "AB": 33, "H": 18, "BB": 7, "HBP": 0, "SO": 1, "SB": 0, "R": 16, "RBI": 10, "2B": 6, "3B": 1, "HR": 1, "TB": 29, "PA": 40, "AVG": 0.545, "SLG": 0.879, "OBP": 0.625, "OPS": 1.504, "pit_G": 7, "outs": 29, "IP": "9.2", "ERA": 19.86, "K6": 3.7, "BB6": 7.4, "H6": 18.6, "WHIP": 4.34, "STR_PCT": 58.0, "pit_SO": 6, "pit_BB": 12, "pit_H": 30, "pit_ER": 32, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 257, "pit_strikes": 149, "PO": 6, "A": 3, "E": 0, "chances": 9, "fld_pct": 1.0, "by_pos": {"P": {"PO": 2, "A": 1, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 28.0}, "SS": {"PO": 4, "A": 2, "E": 0, "chances": 6, "innings": 5, "fld_pct": 1.0, "score": 54.1}}, "hit_score": 56.21, "pit_score": 98.7, "field_score": 55.7, "ovr_score": 56.11, "allstar": null, "id": 36}, {"name": "Frederick H", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 13, "AB": 27, "H": 15, "BB": 6, "HBP": 0, "SO": 2, "SB": 0, "R": 17, "RBI": 8, "2B": 7, "3B": 1, "HR": 0, "TB": 24, "PA": 33, "AVG": 0.556, "SLG": 0.889, "OBP": 0.636, "OPS": 1.525, "pit_G": 5, "outs": 17, "IP": "5.2", "ERA": 4.24, "K6": 7.4, "BB6": 11.6, "H6": 5.3, "WHIP": 2.82, "STR_PCT": 46.8, "pit_SO": 7, "pit_BB": 11, "pit_H": 5, "pit_ER": 4, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 126, "pit_strikes": 59, "PO": 4, "A": 1, "E": 0, "chances": 5, "fld_pct": 1.0, "by_pos": {"P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 30.4}, "LF": {"PO": 3, "A": 0, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 53.7}, "RF": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 48.7}}, "hit_score": 53.46, "pit_score": 76.1, "field_score": 34.5, "ovr_score": 49.56, "allstar": null, "id": 37}, {"name": "David B", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 15, "AB": 28, "H": 13, "BB": 7, "HBP": 0, "SO": 2, "SB": 0, "R": 12, "RBI": 9, "2B": 3, "3B": 1, "HR": 0, "TB": 18, "PA": 35, "AVG": 0.464, "SLG": 0.643, "OBP": 0.571, "OPS": 1.214, "pit_G": 7, "outs": 38, "IP": "12.2", "ERA": 9.47, "K6": 1.9, "BB6": 6.2, "H6": 13.3, "WHIP": 3.24, "STR_PCT": 58.0, "pit_SO": 4, "pit_BB": 13, "pit_H": 28, "pit_ER": 20, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 250, "pit_strikes": 145, "PO": 5, "A": 9, "E": 0, "chances": 14, "fld_pct": 1.0, "by_pos": {"2B": {"PO": 3, "A": 7, "E": 0, "chances": 10, "innings": 8, "fld_pct": 1.0, "score": 55.6}, "P": {"PO": 2, "A": 2, "E": 0, "chances": 4, "innings": 4, "fld_pct": 1.0, "score": 30.7}}, "hit_score": 42.31, "pit_score": 100.0, "field_score": 65.6, "ovr_score": 47.1, "allstar": null, "id": 38}, {"name": "Luc B", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 15, "AB": 35, "H": 21, "BB": 7, "HBP": 0, "SO": 1, "SB": 0, "R": 16, "RBI": 7, "2B": 3, "3B": 1, "HR": 0, "TB": 26, "PA": 42, "AVG": 0.6, "SLG": 0.743, "OBP": 0.667, "OPS": 1.41, "pit_G": 7, "outs": 26, "IP": "8.2", "ERA": 15.23, "K6": 4.2, "BB6": 11.1, "H6": 13.2, "WHIP": 4.04, "STR_PCT": 50.2, "pit_SO": 6, "pit_BB": 16, "pit_H": 19, "pit_ER": 22, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 237, "pit_strikes": 119, "PO": 1, "A": 3, "E": 1, "chances": 5, "fld_pct": 0.8, "by_pos": {"P": {"PO": 0, "A": 3, "E": 1, "chances": 4, "innings": 3, "fld_pct": 0.75, "score": 25.0}, "SS": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 38.1}}, "hit_score": 52.43, "pit_score": 82.7, "field_score": 24.5, "ovr_score": 46.69, "allstar": null, "id": 39}, {"name": "Locke L", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 0, "AB": 0, "H": 0, "BB": 0, "HBP": 0, "SO": 0, "SB": 0, "R": 0, "RBI": 0, "2B": 0, "3B": 0, "HR": 0, "TB": 0, "PA": 0, "AVG": 0.0, "SLG": 0.0, "OBP": 0.0, "OPS": 0.0, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 0, "pit_strikes": 0, "PO": 6, "A": 0, "E": 0, "chances": 6, "fld_pct": 1.0, "by_pos": {"CF": {"PO": 6, "A": 0, "E": 0, "chances": 6, "innings": 6, "fld_pct": 1.0, "score": 66.9}}, "hit_score": null, "pit_score": null, "field_score": 46.2, "ovr_score": 46.2, "allstar": null, "id": 40}, {"name": "Jim C", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 13, "AB": 22, "H": 13, "BB": 7, "HBP": 0, "SO": 3, "SB": 0, "R": 9, "RBI": 11, "2B": 2, "3B": 1, "HR": 0, "TB": 17, "PA": 29, "AVG": 0.591, "SLG": 0.773, "OBP": 0.69, "OPS": 1.463, "pit_G": 4, "outs": 16, "IP": "5.1", "ERA": 3.38, "K6": 12.4, "BB6": 7.9, "H6": 3.4, "WHIP": 1.88, "STR_PCT": 53.1, "pit_SO": 11, "pit_BB": 7, "pit_H": 3, "pit_ER": 3, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 113, "pit_strikes": 60, "PO": 3, "A": 2, "E": 0, "chances": 5, "fld_pct": 1.0, "by_pos": {"1B": {"PO": 3, "A": 0, "E": 0, "chances": 3, "innings": 3, "fld_pct": 1.0, "score": 16.8}, "C": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 30.4}, "P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 30.4}}, "hit_score": 48.4, "pit_score": 86.0, "field_score": 26.7, "ovr_score": 43.94, "allstar": null, "id": 41}, {"name": "Wyatt B", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 15, "AB": 27, "H": 13, "BB": 3, "HBP": 0, "SO": 4, "SB": 0, "R": 4, "RBI": 11, "2B": 1, "3B": 2, "HR": 0, "TB": 18, "PA": 30, "AVG": 0.481, "SLG": 0.667, "OBP": 0.533, "OPS": 1.2, "pit_G": 0, "outs": 0, "IP": "0.0", "ERA": null, "K6": null, "BB6": null, "H6": null, "WHIP": null, "STR_PCT": null, "pit_SO": 0, "pit_BB": 0, "pit_H": 0, "pit_ER": 0, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 0, "pit_strikes": 0, "PO": 3, "A": 1, "E": 1, "chances": 5, "fld_pct": 0.8, "by_pos": {"2B": {"PO": 3, "A": 1, "E": 1, "chances": 5, "innings": 2, "fld_pct": 0.8, "score": 35.6}}, "hit_score": 38.39, "pit_score": null, "field_score": 20.3, "ovr_score": 34.67, "allstar": null, "id": 42}, {"name": "Pearson M", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 15, "AB": 19, "H": 7, "BB": 11, "HBP": 0, "SO": 4, "SB": 0, "R": 13, "RBI": 8, "2B": 2, "3B": 1, "HR": 0, "TB": 11, "PA": 30, "AVG": 0.368, "SLG": 0.579, "OBP": 0.6, "OPS": 1.179, "pit_G": 5, "outs": 20, "IP": "6.2", "ERA": 7.2, "K6": 6.3, "BB6": 4.5, "H6": 11.7, "WHIP": 2.7, "STR_PCT": 57.4, "pit_SO": 7, "pit_BB": 5, "pit_H": 13, "pit_ER": 8, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 115, "pit_strikes": 66, "PO": 5, "A": 1, "E": 0, "chances": 6, "fld_pct": 1.0, "by_pos": {"1B": {"PO": 5, "A": 0, "E": 0, "chances": 5, "innings": 5, "fld_pct": 1.0, "score": 18.3}, "P": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 30.4}}, "hit_score": 36.61, "pit_score": 94.4, "field_score": 21.7, "ovr_score": 33.55, "allstar": null, "id": 43}, {"name": "Henry M", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 3, "AB": 8, "H": 4, "BB": 1, "HBP": 0, "SO": 2, "SB": 0, "R": 2, "RBI": 5, "2B": 2, "3B": 0, "HR": 0, "TB": 6, "PA": 9, "AVG": 0.5, "SLG": 0.75, "OBP": 0.556, "OPS": 1.306, "pit_G": 5, "outs": 13, "IP": "4.1", "ERA": 12.46, "K6": 11.1, "BB6": 13.8, "H6": 13.8, "WHIP": 4.62, "STR_PCT": 51.1, "pit_SO": 8, "pit_BB": 10, "pit_H": 10, "pit_ER": 9, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 139, "pit_strikes": 71, "PO": 1, "A": 1, "E": 0, "chances": 2, "fld_pct": 1.0, "by_pos": {"P": {"PO": 1, "A": 0, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 22.8}, "3B": {"PO": 0, "A": 1, "E": 0, "chances": 1, "innings": 1, "fld_pct": 1.0, "score": 53.3}}, "hit_score": 34.06, "pit_score": 76.5, "field_score": 17.8, "ovr_score": 30.72, "allstar": null, "id": 44}, {"name": "Ward W", "team_key": "BH_BOMBERS", "team_name": "Buckhead Bombers 9U", "G": 15, "AB": 20, "H": 8, "BB": 7, "HBP": 0, "SO": 6, "SB": 0, "R": 8, "RBI": 7, "2B": 3, "3B": 0, "HR": 0, "TB": 11, "PA": 27, "AVG": 0.4, "SLG": 0.55, "OBP": 0.556, "OPS": 1.106, "pit_G": 2, "outs": 5, "IP": "1.2", "ERA": 14.4, "K6": 3.6, "BB6": 14.4, "H6": 25.2, "WHIP": 6.6, "STR_PCT": 50.0, "pit_SO": 1, "pit_BB": 4, "pit_H": 7, "pit_ER": 4, "pit_BF": 0, "pit_BF_est": false, "pit_pitches": 46, "pit_strikes": 23, "PO": 4, "A": 0, "E": 0, "chances": 4, "fld_pct": 1.0, "by_pos": {"1B": {"PO": 4, "A": 0, "E": 0, "chances": 4, "innings": 4, "fld_pct": 1.0, "score": 17.6}}, "hit_score": 31.12, "pit_score": 68.6, "field_score": 7.0, "ovr_score": 26.16, "allstar": null, "id": 45}];
+const TEAMS=[{"key": "BH_BUCKS", "name": "Buckhead Bucks 9U", "color": "#1a5276"}, {"key": "BH_BRAVES", "name": "Buckhead Braves 9U", "color": "#1e8449"}, {"key": "BH_BULLDOGS", "name": "Buckhead Bulldogs 9U", "color": "#6e2f89"}, {"key": "BH_BOMBERS", "name": "Buckhead Bombers 9U", "color": "#c0392b"}];
+const GAMES=[{"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "@ Oregon Park Wahoo", "score": "W 13-0", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/a5b1d180-6060-4b05-a1a5-23df049d49a7"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. Brookwood 9u All Stars", "score": "W 10-7", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/d3aa6436-2b9f-4a3d-840c-41b42f7e995f"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "@ TBD- 05/24/26, 2:30 PM", "score": "L 7-10", "result": "L", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/391a2e4c-6a5a-42f1-ba47-168a4ae99e40"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. Hopewell Hawks Red 9U", "score": "W 18-3", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/cd9233fa-8f20-44b4-91e9-940f4cbbf7c4"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. Murphy Candler - Blue", "score": "W 16-1", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/94a2aedc-6fdb-4cc4-a42a-2e5ebb27792a"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. Murphy Candler - Blue", "score": "W 10-2", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/149c9eea-6ab7-441b-a630-09b32917e921"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. 9U DHYS Blue Devils", "score": "W 8-3", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/062fa6bc-4b14-4d5b-bad7-ff3ed86fb9a4"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "@ 10u Buckhead Bulldogs 26", "score": "W 13-5", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/2479aab6-9c7b-400b-b3f2-1c6a64d2fada"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "@ Roswell Renegades- Black 9U", "score": "W 13-7", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/a9004248-8ad4-41ca-bcd5-23f6a2a7e4ed"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. Perry 9U All Stars", "score": "W 10-5", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/bcb7064e-f6b0-412c-a496-a5ea1af376c5"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. SSYS Storm 9U", "score": "L 7-8", "result": "L", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/e1a5efa6-64b6-4666-89d0-4227751404a0"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "@ NYO 9U Bulls", "score": "T 11-11", "result": "T", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/a18943a6-bac0-4153-a118-d27cc458d2c9"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "@ Banditos 9U", "score": "W 12-3", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/19d594a5-453a-434c-8c36-43be52356083"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "@ 9u Sun Devils DHYS", "score": "W 10-4", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/31d4a1c9-d667-45ea-b3aa-8c7ad097c44d"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. 9u Stingers 2026 9U", "score": "W 12-8", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/cf290641-762f-49e3-a885-8ad878f3c77a"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. MCB Blue Sox 9U", "score": "W 9-8", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/3352d078-6979-4a39-8cab-774ee90de02b"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "@ Bw allstars ( A )", "score": "W 21-0", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/2cded48c-089c-42b6-bb49-737d269e1364"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "@ 9U DHYS Blue Devils", "score": "W 15-7", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/5a9866d8-db01-498e-b9b1-40b9dd99edd9"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. MCB Blue Sox 9U", "score": "W 8-3", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/1157a139-14ed-45ae-bfb8-5fd62547e30e"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. Roswell Renegades - Green 9U", "score": "W 8-0", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/a5a92996-ceb2-4a29-bb30-24c70da1d5ce"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. Mountain Monsters 9U", "score": "W 5-4", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/109c9e07-b5ee-4440-9ca2-b2434697e892"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. Going Yard 9U", "score": "W 12-11", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/2c2f5d31-42fe-49e0-a111-9df2e4967aa3"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "vs. Georgia Bombers Marucci 9U", "score": "W 9-5", "result": "W", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/65a86f37-851c-410d-877b-56c3507aa925"}, {"team_key": "BH_BUCKS", "date": "Jun ?", "opponent": "@ NYO 9U Longhorns", "score": "L 4-6", "result": "L", "url": "https://web.gc.com/teams/BhMUQjk4RUkW/2026-spring-9u-buckhead-bucks-26/schedule/ec08b89f-5f19-4e0a-ab82-20724e42eb53"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ MCB Blue Sox 9U", "score": "W 13-5", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/d368b7da-23b5-4adb-bf35-dce1300a4c91"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. 9U MCB Gold Sox", "score": "W 8-7", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/f2f5eff1-7f0c-4d37-b3a2-4f529796143a"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. SSYS Storm 9U", "score": "W 4-1", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/b9f91502-1c63-4486-ae21-bd9fd61d6c90"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ Oregon Park Sharks!!!", "score": "W 5-4", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/354235de-288c-4466-bcd1-bd4ce5a31662"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. East Marietta Spikes 10U", "score": "W 10-3", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/2c054792-f76b-442b-bae2-ebb574de2b1c"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ Hobgood Heat 10U", "score": "W 16-3", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/86988cba-93a3-49f5-824d-e6826f440ab8"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ Oregon Park Sharks!!!", "score": "W 14-4", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/56669fb4-f678-409c-9581-44706b77d2d7"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ Midway TG D-Backs 8U", "score": "W 16-1", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/c540b48c-b2b3-46ba-bdba-25ab6acc185f"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. Canes Southeast - Croft 8U", "score": "L 11-15", "result": "L", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/d5db3812-833f-4d1f-a5a9-c778a6021227"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ YF Select - McGuffee 9U", "score": "W 8-7", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/9dcbe147-fa21-46d1-a520-f2116a2846d0"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ Canes Southeast - Croft 8U", "score": "W 12-9", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/0e4c5238-d90b-45be-83bd-577ba4a9a81d"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ NYO 9U Toros", "score": "W 7-6", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/9b2f3966-b322-4414-89a9-4e0b391c0f0e"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ Shoalies Baseball 9U", "score": "W 12-6", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/dab37d67-c973-4296-a720-b484a1f2c954"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ Cherokee Reds 9U", "score": "W 16-2", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/b8fbc52c-497a-406a-948b-cb37a2e47200"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. NYO 9U Bulls", "score": "W 7-4", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/a05be156-d679-4a03-8324-924aabb3bf69"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ DC Academy 9U", "score": "W 9-7", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/fbcafdab-2644-4f83-85e4-02974d886aa1"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ KC Roos GA National 9U", "score": "W 19-13", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/b3e5d82b-b4b7-4d27-af80-27665cdc0478"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. NYO 9U Bulls", "score": "W 15-5", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/3dc133ed-41e7-418f-a58f-555723ea179d"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. KC Roos GA National 9U", "score": "W 9-8", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/7ec355a3-7091-4786-969b-ebf2dc3b8086"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. Archer Vipers 9U", "score": "W 13-11", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/5052ff90-1ebd-4ca8-a860-fa8f41d8598b"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. JG Showcase 9U", "score": "W 14-2", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/2194e358-2e75-4196-9e3d-0fa1aec166cb"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. TBD Jun 27, 2026", "score": "W 13-2", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/1371c018-5e18-4b49-bd2f-9312429eeb7a"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "vs. TBD- 06/28/26, 10:40 AM", "score": "W 11-2", "result": "W", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/8f28e851-3125-482a-9549-fe16e83b7945"}, {"team_key": "BH_BRAVES", "date": "Jun ?", "opponent": "@ DC Academy 9U", "score": "L 6-10", "result": "L", "url": "https://web.gc.com/teams/9FeInunFasoo/2026-spring-9u-buckhead-braves-26/schedule/61aecae2-5bff-45a4-a52a-8ffc4ab9260a"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "@ Canton Noles 9U", "score": "W 16-1", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/76791068-2d87-46c1-9cf3-04f74a20cab5"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "vs. MCB Red Sox 9U", "score": "W 15-6", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/8b93ee12-4496-4dcb-94b6-4d6eb46a7eb7"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "vs. Roswell Renegades- Black 9U", "score": "L 8-13", "result": "L", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/aeb5084c-1b60-471e-af86-f7abf25ced2a"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "vs. Wahoos 9U", "score": "W 15-8", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/2973a60e-7669-406c-8632-fc056130631f"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "vs. SC Indians 9U", "score": "L 5-13", "result": "L", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/7837294f-e01f-4fe3-8a37-163da923ed7a"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "vs. Wahoos 9U", "score": "W 8-7", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/814aaffd-278d-49bb-8398-5884b36aa775"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "@ MCB White Sox 9U", "score": "L 11-12", "result": "L", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/f955f269-6804-4e6c-810e-816ffda1b4e1"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "vs. SC Indians 9U", "score": "W 12-0", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/11852d8c-936a-4638-8739-8f03748afc21"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "@ Wild Thunder⚡️", "score": "W 24-9", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/9ff9dc9c-f0af-4144-849e-9d5fed661e05"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "vs. MCB White Sox 9U", "score": "W 11-10", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/7363f409-2601-4684-aa18-cefe8a881a95"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "vs. 9u Buckhead Bombers 26", "score": "L 3-8", "result": "L", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/92ebec5e-cd61-44e6-92b4-20666a49826b"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "@ 9U All-Stars", "score": "W 13-6", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/630484f0-91f4-4153-95bb-608e3da0f59a"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "vs. Alpharetta Eagles 9U", "score": "W 12-11", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/ab32f07b-973c-4dce-955b-92dac1324ae8"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "@ MCB White Sox 9U", "score": "W 11-9", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/b2ea0ae2-64b0-46c4-a50d-eb955ac08a15"}, {"team_key": "BH_BULLDOGS", "date": "Jun ?", "opponent": "@ Wahoos 9U", "score": "W 12-4", "result": "W", "url": "https://web.gc.com/teams/q91X09Uu5xag/2026-spring-9u-buckhead-bulldogs-26/schedule/2db9d955-2eda-4443-b26f-a54bd8024836"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. MCB White Sox 9U", "score": "W 10-1", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/c2f62075-ab8a-4958-8c67-a49a4ddc086c"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. Sandy Plains Cougars Blue 9U", "score": "W 9-8", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/c0685ab0-4dec-4202-9a66-d567643e688b"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "@ 9u Sun Devils DHYS", "score": "W 8-4", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/d787fa65-a535-4760-835a-f6b1a7690d2b"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "@ NYO 9U Young Guns", "score": "L 5-11", "result": "L", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/8f45e51e-9c3b-4a85-83ff-dddb3044bd38"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. Buckhaven banditos", "score": "W 11-3", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/31bbad87-6fb0-4d86-85e2-bc3849e6df7c"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "@ 9U Ocee Black", "score": "W 8-5", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/8f1bfad2-43c6-4a40-84f3-c7627d765c77"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. TBD- 06/07/26, 10:15 AM", "score": "W 12-8", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/907dcd51-fa81-4825-ac0c-742ed40c916b"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "@ South cherokee indians 9U", "score": "W 11-9", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/76f858a3-9de3-4b22-9b81-5725cde18dd4"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. TBD- 06/07/26, 3:00 PM", "score": "L 6-14", "result": "L", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/bedf1562-c3be-4f3d-9691-e84f42b69c91"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. Smyrna Red 8U", "score": "W 6-3", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/69ec0d05-e334-4fa0-9357-378209c271c2"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. Alpharetta Eagles 9U", "score": "W 11-2", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/9f3403ad-dc1c-4157-8bff-b2aeee15b050"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. Smyrna Red 8U", "score": "W 12-6", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/d1301175-2224-4d22-9065-57564e6aa659"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "@ TBD- 06/14/26, 4:00 PM", "score": "W 8-3", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/d6e7818c-d497-4a3c-9d0a-35828c212b2d"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. NYO 9U Young Guns", "score": "W 14-13", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/19d0f085-24ff-453a-8080-2b6aac04c8c3"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "@ BW ALL-stars 9U", "score": "W 12-5", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/3530ba88-388f-4432-9652-3c468cded5de"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. MCB Blue Sox 9U", "score": "L 0-14", "result": "L", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/e8e24fb5-9db2-47df-9d7b-8dca02e3a9d6"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. 9U DHYS Blue Devils", "score": "W 12-9", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/6dad0f9c-f0a1-447c-980e-c72285538f9d"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "@ NYO 9U Young Guns", "score": "W 17-8", "result": "W", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/16780dd1-d332-4e85-9142-83e88d491c3b"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. Sandy Plains Red Cougars 9U", "score": "L 4-14", "result": "L", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/c9216eee-9c69-4201-ba10-db3455ae6964"}, {"team_key": "BH_BOMBERS", "date": "Jun ?", "opponent": "vs. Brookwood 9u All Stars", "score": "L 16-17", "result": "L", "url": "https://web.gc.com/teams/LIA9fnSBsMX3/2026-spring-9u-buckhead-bombers-26/schedule/89b0e561-34f0-4ee0-a1fb-3baf1ae619c8"}];
+const RECORDS={"BH_BUCKS": {"W": 20, "L": 3, "T": 1}, "BH_BRAVES": {"W": 22, "L": 2, "T": 0}, "BH_BULLDOGS": {"W": 11, "L": 4, "T": 0}, "BH_BOMBERS": {"W": 15, "L": 5, "T": 0}};
+const teamColorMap={};
+TEAMS.forEach(t=>teamColorMap[t.key]=t.color);
+
+let activeTab='ratings',activeTeam='ALL',activePos='ALL',sortState={};
+
+function buildTeamFilter(){
+  const div=document.getElementById('team-filter');
+  const allBtn=document.createElement('button');
+  allBtn.className='team-btn active';allBtn.textContent='All';
+  allBtn.onclick=()=>{activeTeam='ALL';updateTeamBtns(allBtn);render()};
+  div.appendChild(allBtn);
+  TEAMS.forEach(t=>{
+    const btn=document.createElement('button');
+    btn.className='team-btn';btn.textContent=t.name.replace('MCB ','').replace(' 9U','');
+    btn.style.borderColor=t.color;
+    btn.dataset.tk=t.key;
+    btn.onclick=()=>{activeTeam=t.key;updateTeamBtns(btn);render()};
+    div.appendChild(btn);
+  });
+}
+
+function updateTeamBtns(active){
+  document.querySelectorAll('.team-btn').forEach(b=>{b.classList.remove('active');b.style.background='';b.style.color=''});
+  active.classList.add('active');
+  if(activeTeam!=='ALL'){const c=teamColorMap[activeTeam]||'#fff';active.style.background=c+'22';active.style.color=c;}
+}
+
+function showTab(tab,e){
+  activeTab=tab;
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(e&&e.target)e.target.classList.add('active');
+  document.getElementById('pos-controls').style.display=(tab==='fielding')?'flex':'none';
+  render();
+}
+
+function filterPos(pos){
+  activePos=pos;
+  document.querySelectorAll('.pos-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');render();
+}
+
+function scoreClass(v){if(v===null||v===undefined)return'score-none';if(v>=75)return'score-hi';if(v>=45)return'score-mid';return'score-lo';}
+function fmtScore(v){if(v===null||v===undefined)return'<span class="score-none">—</span>';return`<span class="score-cell ${scoreClass(v)}">${v.toFixed(1)}</span>`;}
+function fmtAvg(v){if(!v&&v!==0)return'—';return v.toFixed(3).replace(/^0/,'');}
+function fmtVal(v,dec=2){if(v===null||v===undefined)return'—';return typeof v==='number'?v.toFixed(dec):v;}
+
+function filtered(){return PLAYERS.filter(p=>activeTeam==='ALL'||p.team_key===activeTeam);}
+
+function teamCell(p){const color=teamColorMap[p.team_key]||'#888';return`<div class="team-cell"><span class="team-dot" style="background:${color}"></span>${p.team_name.replace('MCB ','').replace(' 9U','')}</div>`;}
+function nameCell(p){
+  return`<span class="player-name" style="cursor:pointer;text-decoration:underline dotted" onclick="showPlayer(${p.id||PLAYERS.indexOf(p)})">${p.name}</span>`;
+}
+
+function render(){
+  if(activeTab==='ratings')renderRatings();
+  else if(activeTab==='hitting')renderHitting();
+  else if(activeTab==='pitching')renderPitching();
+  else if(activeTab==='fielding')renderFielding();
+  else if(activeTab==='games')renderGames();
+  else if(activeTab==='opponents')renderOpponents();
+}
+
+function renderRatings(){
+  const rows=filtered().filter(p=>p.ovr_score!==null&&p.ovr_score!==undefined).sort((a,b)=>(b.ovr_score||0)-(a.ovr_score||0));
+  const tbody=document.getElementById('ratings-body');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="14" class="empty-msg">No data</td></tr>';return;}
+  tbody.innerHTML=rows.map(p=>`<tr>
+    <td>${nameCell(p)}</td><td>${teamCell(p)}</td>
+    <td>${p.G||0}</td><td>${p.AB||0}</td>
+    <td>${fmtAvg(p.AVG)}</td><td>${fmtAvg(p.SLG)}</td>
+    <td>${p.R??0}</td><td>${p.RBI??0}</td>
+    <td>${p.outs>0?p.IP:'—'}</td><td>${p.chances||0}</td>
+    <td>${fmtScore(p.hit_score)}</td><td>${fmtScore(p.pit_score)}</td>
+    <td>${fmtScore(p.field_score)}</td><td>${fmtScore(p.ovr_score)}</td>
+  </tr>`).join('');
+}
+
+function renderHitting(){
+  const rows=filtered().filter(p=>p.PA>0).sort((a,b)=>(b.hit_score||0)-(a.hit_score||0));
+  const tbody=document.getElementById('hitting-body');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="20" class="empty-msg">No data</td></tr>';return;}
+  tbody.innerHTML=rows.map(p=>`<tr>
+    <td>${nameCell(p)}</td><td>${teamCell(p)}</td>
+    <td>${p.G}</td><td>${p.PA||0}</td><td>${p.AB}</td><td>${p.H}</td>
+    <td>${p['2B']}</td><td>${p['3B']}</td><td>${p.HR}</td>
+    <td>${p.R}</td><td>${p.RBI}</td><td>${p.BB}</td>
+    <td>${p.HBP||0}</td><td>${p.SB}</td><td>${p.SO}</td>
+    <td>${fmtAvg(p.AVG)}</td><td>${fmtAvg(p.OBP)}</td>
+    <td>${fmtAvg(p.SLG)}</td><td>${fmtAvg(p.OPS)}</td>
+    <td>${fmtScore(p.hit_score)}</td>
+  </tr>`).join('');
+}
+
+function renderPitching(){
+  const rows=filtered().filter(p=>p.outs>0).sort((a,b)=>(b.pit_score||0)-(a.pit_score||0));
+  const tbody=document.getElementById('pitching-body');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="15" class="empty-msg">No data</td></tr>';return;}
+  tbody.innerHTML=rows.map(p=>`<tr>
+    <td>${nameCell(p)}</td><td>${teamCell(p)}</td>
+    <td>${p.pit_G||0}</td><td>${p.IP}</td>
+    <td title="${p.pit_BF_est?'Estimated (outs+H+BB) -- exact BF not available':'Exact, from GameChanger'}">${p.pit_BF!=null?(p.pit_BF_est?'~':'')+p.pit_BF:'—'}</td>
+    <td>${p.pit_H}</td><td>${p.pit_ER}</td><td>${p.pit_BB}</td><td>${p.pit_SO}</td>
+    <td>${fmtVal(p.ERA)}</td><td>${fmtVal(p.WHIP)}</td>
+    <td>${fmtVal(p.K6,1)}</td><td>${fmtVal(p.BB6,1)}</td>
+    <td>${p.STR_PCT!==null&&p.STR_PCT!==undefined?p.STR_PCT.toFixed(1)+'%':'—'}</td>
+    <td>${fmtScore(p.pit_score)}</td>
+  </tr>`).join('');
+}
+
+function renderFielding(){
+  let rows=filtered();
+  if(activePos!=='ALL'){
+    rows=rows.filter(p=>p.by_pos&&p.by_pos[activePos]).map(p=>{
+      const st=p.by_pos[activePos];
+      return{...p,_fPO:st.PO,_fA:st.A,_fE:st.E,_fTC:st.chances,_fInn:(st.innings||0),_fFP:st.fld_pct,_fFS:st.score};
+    }).sort((a,b)=>(b._fFS||0)-(a._fFS||0));
+  }else{
+    rows=rows.filter(p=>p.chances>0).map(p=>{
+      return{...p,_fPO:p.PO,_fA:p.A,_fE:p.E,_fTC:p.chances,_fInn:Object.values(p.by_pos||{}).reduce((s,v)=>s+(v.innings||0),0),_fFP:p.fld_pct,_fFS:p.field_score};
+    }).sort((a,b)=>(b._fFS||0)-(a._fFS||0));
+  }
+  const tbody=document.getElementById('fielding-body');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="9" class="empty-msg">No fielding data'+(activePos!=='ALL'?' at '+activePos:'')+'</td></tr>';return;}
+  tbody.innerHTML=rows.map(p=>{
+    const tags=p.by_pos?Object.keys(p.by_pos).map(pos=>`<span class="pos-tag">${pos}</span>`).join(''):'';
+    return`<tr>
+      <td>${nameCell(p)}</td><td>${teamCell(p)}</td><td>${tags}</td>
+      <td>${p._fPO??0}</td><td>${p._fA??0}</td><td>${p._fE??0}</td>
+      <td>${p._fTC??0}</td>
+      <td>${p._fInn??0}</td>
+      <td>${p._fFP!==null&&p._fFP!==undefined?p._fFP.toFixed(3).replace(/^0/,''):'—'}</td>
+      <td>${fmtScore(p._fFS)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function sortTable(tableId,col){
+  const dir=(sortState[tableId]?.col===col&&sortState[tableId]?.dir==='desc')?'asc':'desc';
+  sortState[tableId]={col,dir};
+  const tbody=document.getElementById(tableId).querySelector('tbody');
+  const rows=Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a,b)=>{
+    const va=cellVal(a,col),vb=cellVal(b,col);
+    if(typeof va==='string'&&typeof vb==='string')return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+    return dir==='asc'?(va||0)-(vb||0):(vb||0)-(va||0);
+  });
+  rows.forEach(r=>tbody.appendChild(r));
+  document.querySelectorAll(`#${tableId} thead th`).forEach((th,i)=>{
+    th.classList.remove('sort-asc','sort-desc');
+    if(i===col)th.classList.add(dir==='asc'?'sort-asc':'sort-desc');
+  });
+}
+
+function cellVal(row,col){
+  const cell=row.cells[col];if(!cell)return 0;
+  const text=cell.innerText.trim().replace(/[^0-9.-]/g,'');
+  const num=parseFloat(text);return isNaN(num)?cell.innerText.trim():num;
+}
+
+function fmtN(v,d=1){return(v===null||v===undefined)?'—':Number(v).toFixed(d);}
+function fmtA(v){return(!v&&v!==0)?'—':Number(v).toFixed(3).replace(/^0/,'');}
+
+function showPlayer(idx){
+  const p=PLAYERS[idx]; if(!p) return;
+  const color=teamColorMap[p.team_key]||'#888';
+  document.getElementById('modal-name').innerHTML=
+    `${p.name} <span style='font-size:13px;color:${color}'>${p.team_name.replace('MCB ','').replace(/ [0-9]+U/,'')}</span>`;
+  let html='';
+  // Hitting
+  if(p.AB>0){
+    html+='<div class="section-hdr">Batting</div><div class="stat-grid">';
+    [['G',p.G],['AB',p.AB],['H',p.H],['2B',p['2B']],['3B',p['3B']],['HR',p.HR],
+     ['R',p.R],['RBI',p.RBI],['BB',p.BB],['SO',p.SO],['SB',p.SB],
+     ['AVG',fmtA(p.AVG)],['OBP',fmtA(p.OBP)],['SLG',fmtA(p.SLG)],['OPS',fmtA(p.OPS)]]
+    .forEach(([l,v])=>html+=`<div class='stat-row'><span class='stat-label'>${l}</span><span class='stat-val'>${v??0}</span></div>`);
+    html+='</div>';
+  }
+  // Pitching
+  if(p.outs>0){
+    html+='<div class="section-hdr">Pitching</div><div class="stat-grid">';
+    [['G',p.pit_G||0],['IP',p.IP],['H',p.pit_H],['ER',p.pit_ER],
+     ['BB',p.pit_BB],['SO',p.pit_SO],['ERA',fmtN(p.ERA)],['WHIP',fmtN(p.WHIP)],
+     ['K/6',fmtN(p.K6)],['BB/6',fmtN(p.BB6)],
+     ['#P',p.pit_pitches||0],['#S',p.pit_strikes||0],
+     ['STR%',p.STR_PCT!==null&&p.STR_PCT!==undefined?fmtN(p.STR_PCT)+'%':'—']]
+    .forEach(([l,v])=>html+=`<div class='stat-row'><span class='stat-label'>${l}</span><span class='stat-val'>${v??'—'}</span></div>`);
+    html+='</div>';
+  }
+  // Fielding
+  if(p.chances>0){
+    html+='<div class="section-hdr">Fielding</div><div class="stat-grid">';
+    [['PO',p.PO],['A',p.A],['E',p.E],['TC',p.chances]]
+    .forEach(([l,v])=>html+=`<div class='stat-row'><span class='stat-label'>${l}</span><span class='stat-val'>${v??0}</span></div>`);
+    if(p.by_pos)Object.entries(p.by_pos).forEach(([pos,st])=>{
+      html+=`<div class='stat-row'><span class='stat-label'>${pos}</span>`+
+            `<span class='stat-val'>${st.PO}PO ${st.A}A ${st.E}E`+
+            `${st.innings?' ('+st.innings+' inn)':''}</span></div>`;
+    });
+    html+='</div>';
+  }
+  // Scores
+  html+='<div class="section-hdr">Scores</div><div class="stat-grid">';
+  [['Hit Score',p.hit_score!==null?fmtN(p.hit_score):'—'],
+   ['Pit Score',p.pit_score!==null?fmtN(p.pit_score):'—'],
+   ['Fld Score',p.field_score!==null?fmtN(p.field_score):'—'],
+   ['OVR',p.ovr_score!==null?fmtN(p.ovr_score):'—']]
+  .forEach(([l,v])=>html+=`<div class='stat-row'><span class='stat-label'>${l}</span><span class='stat-val'>${v}</span></div>`);
+  html+='</div>';
+  document.getElementById('modal-body').innerHTML=html;
+  document.getElementById('player-modal').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('player-modal').classList.remove('open');
+}
+
+buildTeamFilter();renderRecords();render();
+
+function renderRecords() {
+  const div = document.getElementById('team-filter');
+  if (!div) return;
+  // Add W-L after each team button
+  setTimeout(function() {
+    document.querySelectorAll('.team-btn').forEach(function(btn) {
+      const tk = btn.dataset.tk;
+      if (!tk || !RECORDS[tk]) return;
+      const r = RECORDS[tk];
+      const rec = document.createElement('span');
+      rec.style.cssText = 'font-size:10px;color:var(--muted);margin-left:4px;vertical-align:middle';
+      rec.textContent = r.W+'-'+r.L+(r.T?'-'+r.T:'');
+      btn.appendChild(rec);
+    });
+  }, 50);
+}
+
+function renderGames() {
+  const rows = GAMES.filter(g => activeTeam === 'ALL' || g.team_key === activeTeam)
+    .sort((a,b) => a.date.localeCompare(b.date) || a.team_key.localeCompare(b.team_key));
+  const tbody = document.getElementById('games-body');
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No games yet</td></tr>'; return; }
+  const teamMap = {};
+  TEAMS.forEach(t => teamMap[t.key] = t);
+  tbody.innerHTML = rows.map(g => {
+    const t = teamMap[g.team_key] || {};
+    const color = t.color || '#888';
+    const shortName = (t.name||'').replace('MCB ','').replace(' 9U','');
+    const resColor = g.result==='W'?'#4caf50':g.result==='L'?'#e53935':'var(--muted)';
+    const gcLink = g.url ? `<a href="${g.url}" target="_blank" style="color:var(--accent);font-size:12px">View ↗</a>` : '—';
+    return `<tr>
+      <td style="text-align:left">${g.date}</td>
+      <td><div class="team-cell"><span class="team-dot" style="background:${color}"></span>${shortName}</div></td>
+      <td style="text-align:left">${g.opponent}</td>
+      <td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:${resColor}">${g.result||'—'}</td>
+      <td>${g.score.replace(/^[WLT]\s+/,'')}</td>
+      <td style="text-align:center">${gcLink}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderOpponents() {
+  const container = document.getElementById('opponents-container');
+  // Group games by opponent
+  const oppMap = {};
+  GAMES.filter(g => activeTeam==='ALL' || g.team_key===activeTeam).forEach(g => {
+    const opp = g.opponent.trim();
+    if (!oppMap[opp]) oppMap[opp] = [];
+    oppMap[opp].push(g);
+  });
+  // Sort opponents: multi-team first, then alpha
+  const opps = Object.keys(oppMap).sort((a,b) => {
+    const da = new Set(oppMap[a].map(g=>g.team_key)).size;
+    const db = new Set(oppMap[b].map(g=>g.team_key)).size;
+    return db-da || a.localeCompare(b);
+  });
+  const teamMap = {};
+  TEAMS.forEach(t => teamMap[t.key] = t);
+
+  if (!opps.length) { container.innerHTML = '<div class="empty-msg">No opponents yet</div>'; return; }
+
+  container.innerHTML = opps.map(opp => {
+    const games = oppMap[opp];
+    const teams = new Set(games.map(g=>g.team_key)).size;
+    const badge = teams > 1 ? `<span style="font-size:10px;background:#1a2a3a;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:1px 6px;margin-left:8px">${teams} teams</span>` : '';
+    const rows = games.map(g => {
+      const t = teamMap[g.team_key] || {};
+      const color = t.color||'#888';
+      const shortName = (t.name||'').replace('MCB ','').replace(' 9U','');
+      const resColor = g.result==='W'?'#4caf50':g.result==='L'?'#e53935':'var(--muted)';
+      return `<tr>
+        <td style="text-align:left">${g.date}</td>
+        <td><div class="team-cell"><span class="team-dot" style="background:${color}"></span>${shortName}</div></td>
+        <td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:${resColor}">${g.result||'—'}</td>
+        <td>${g.score.replace(/^[WLT]\s+/,'')}</td>
+        <td style="text-align:center">${g.url?`<a href="${g.url}" target="_blank" style="color:var(--accent);font-size:12px">View ↗</a>`:'—'}</td>
+      </tr>`;
+    }).join('');
+    return `<div style="margin-bottom:20px">
+      <div style="font-family:Oswald,sans-serif;font-size:15px;font-weight:600;color:var(--text);padding:8px 0 4px;border-bottom:1px solid var(--border)">${opp}${badge}</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr>
+          <th style="text-align:left;padding:6px 10px;color:var(--muted);font-size:11px;font-family:Oswald,sans-serif">Date</th>
+          <th style="text-align:left;padding:6px 10px;color:var(--muted);font-size:11px;font-family:Oswald,sans-serif">MCB Team</th>
+          <th style="padding:6px 10px;color:var(--muted);font-size:11px;font-family:Oswald,sans-serif">W/L</th>
+          <th style="padding:6px 10px;color:var(--muted);font-size:11px;font-family:Oswald,sans-serif">Score</th>
+          <th style="padding:6px 10px;color:var(--muted);font-size:11px;font-family:Oswald,sans-serif">Link</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+</script>
+<div class="modal-bg" id="player-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    <div class="modal-title" id="modal-name"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+</body>
+</html>
